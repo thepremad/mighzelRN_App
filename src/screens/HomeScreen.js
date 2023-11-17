@@ -47,10 +47,12 @@ import RenderProducts from '../components/RenderProducts';
 import HomeShimmer from '../shimmers/HomeShimmer';
 import HomeBannerShimmer from '../shimmers/HomeBannerShimmer';
 import FastImage from 'react-native-fast-image';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const HomeScreen = ({navigation}) => {
   const [displayName, setDisplayName] = useState('');
   const [bannerLoader, setBannerLoader] = useState(true);
+  const [mainLoader, setMainLoader] = useState(true);
   const [bannerList, setBannerList] = useState([
     {
       id: 1,
@@ -120,11 +122,13 @@ const HomeScreen = ({navigation}) => {
     errorThird,
   } = useSelector(state => state.home);
 
-  console.log('HOME_ERROR', {
-    errorFirst,
-    errorSecond,
-    errorThird,
-  });
+  // console.log(homeDataFirst);
+
+  // console.log('HOME_ERROR', {
+  //   errorFirst,
+  //   errorSecond,
+  //   errorThird,
+  // });
 
   useEffect(() => {
     const fetchName = async () => {
@@ -132,10 +136,13 @@ const HomeScreen = ({navigation}) => {
       setDisplayName(name);
     };
     fetchName();
+    const timeOutID = setTimeout(() => setBannerLoader(false), 1000);
+
+    return () => clearTimeout(timeOutID);
   }, []);
 
   useEffect(() => {
-    // dispatch(fetchHomeDataFirstRequest());
+    dispatch(fetchHomeDataSecondRequest());
   }, [dispatch]);
 
   const renderItem = ({item}) => {
@@ -221,10 +228,10 @@ const HomeScreen = ({navigation}) => {
   const RenderHomeItem = useMemo(
     () =>
       memo(({item}) => {
-        console.log('<RenderHomeItem />');
+        // console.log('<RenderHomeItem />');
         return (
           <View style={{flex: 1}}>
-            {item?.category_name === 'Mix n Match' && (
+            {/* {item?.category_name === 'Mix n Match' && (
               <Carousel
                 autoplay={true}
                 activeSlideAlignment="center"
@@ -235,7 +242,7 @@ const HomeScreen = ({navigation}) => {
                 itemWidth={300}
                 inactiveSlideOpacity={1}
               />
-            )}
+            )} */}
 
             {item?.category_name !== 'Mix n Match' && (
               <FastImage
@@ -258,11 +265,13 @@ const HomeScreen = ({navigation}) => {
               scrollEnabled={false}
               data={item?.product_data}
               keyExtractor={i => i?.product_id?.toString()}
-              renderItem={({item, index}) => (
-                <RenderProducts item={item} home />
-              )}
+              renderItem={i => {
+                const prod = i.item;
+                return <RenderProducts item={prod} />;
+              }}
               numColumns={2}
-              disableVirtualization={true}
+              // disableVirtualization={true}
+
               // removeClippedSubviews={true}
             />
 
@@ -296,11 +305,50 @@ const HomeScreen = ({navigation}) => {
           // removeClippedSubviews={true}
         /> */}
 
-          {[homeDataFirst, homeDataSecond, homeDataThird]
-            .filter(item => item && Object.keys(item).length > 0)
-            .map(item => (
-              <RenderHomeItem item={item} />
-            ))}
+          {!bannerLoader || !shimmerFirst ? (
+            <Carousel
+              autoplay={true}
+              activeSlideAlignment="center"
+              loop={true}
+              data={bannerList}
+              renderItem={renderItem}
+              sliderWidth={wp(100)}
+              itemWidth={300}
+              inactiveSlideOpacity={1}
+            />
+          ) : (
+            <SkeletonPlaceholder borderRadius={4}>
+              <SkeletonPlaceholder.Item
+                height={290}
+                width={wp(80)}
+                borderRadius={4}
+                alignSelf="center"
+                marginVertical={hp(0.5)}
+              />
+            </SkeletonPlaceholder>
+          )}
+          {bannerLoader ? (
+            <HomeShimmer />
+          ) : (
+            [homeDataFirst, homeDataSecond, homeDataThird]
+              .filter(item => item && Object.keys(item).length > 0)
+              .map((item, index) => <RenderHomeItem key={index} item={item} />)
+          )}
+          {(shimmerFirst || shimmerSecond || shimmerThird) && (
+            <HomeShimmer>
+              {!shimmerFirst && (
+                <SkeletonPlaceholder borderRadius={4}>
+                  <SkeletonPlaceholder.Item
+                    height={290}
+                    width={wp(100)}
+                    borderRadius={4}
+                    alignSelf="center"
+                    marginVertical={hp(0.5)}
+                  />
+                </SkeletonPlaceholder>
+              )}
+            </HomeShimmer>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -323,7 +371,7 @@ const styles = StyleSheet.create({
     color: '#cf8385',
     textAlign: 'center',
     marginVertical: hp(2),
-    fontWeight: '700',
+    fontFamily: 'Roboto-Bold',
   },
   buttonContainer: {
     height: hp(5.6),

@@ -8,48 +8,105 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import {TextInput} from 'react-native-paper';
+import {ActivityIndicator, TextInput} from 'react-native-paper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import Header from '../components/Header';
+import {useSelector} from 'react-redux';
+import {makeRequest} from '../api/ApiInfo';
+import {showSnack} from '../components/Snackbar';
+import {async_keys, getData} from '../storage/UserPreference';
 
 // image
 // import ima_leftArrow from '../asserts/Image/ima_leftArrow.png';
 // import ic_rightArrow from '../asserts/Image/ic_rightArrow.png';
-const AddressAddNewShipping = ({navigation}) => {
+const AddressAddNewShipping = ({navigation, route}) => {
+  console.log(route);
+  const [loader, setLoader] = useState(false);
   const [inputs, setInputs] = useState({
     first_name: '',
     last_name: '',
-    street_name: '',
-    apartment: '',
+    company: '',
+    address_1: '',
+    address_2: '',
     city: '',
-    zip_code: '',
-    country: '',
     state: '',
+    postcode: '',
+    country: '',
+    email: '',
     phone: '',
   });
+
+  const {cartData, isLoading, error} = useSelector(state => state.cart);
+
+  useEffect(() => {
+    // console.log(cartData?.billing_address);
+    setInputs({
+      ...inputs,
+      ...cartData?.billing_address,
+    });
+  }, [isLoading]);
 
   const handleInputs = (value, key) => {
     setInputs({...inputs, [key]: value});
   };
 
-  const handleSave = () => {
-    console.log(inputs);
+  const handleSave = async () => {
+    try {
+      const customer_id = await getData(async_keys.customer_id);
+      setLoader(true);
+      const res = await makeRequest(
+        `update_shipping_address`,
+        {...inputs, customer_id},
+        true,
+      );
+      if (res) {
+        const {Status, Message} = res;
+        if (Status === true) {
+          showSnack(Message);
+          if (route.name === 'AddShippingAddressScreen-Cart') {
+            navigation.goBack();
+          }
+        } else {
+          showSnack(Message, null, true);
+        }
+      } else {
+        showSnack('Some error occured', null, true);
+      }
+      setLoader(false);
+    } catch (error) {
+      setLoader(false);
+      showSnack('Some error occured', null, true);
+      console.log(error);
+    }
   };
 
   return (
     <View style={styles.container}>
+      {(isLoading || loader) && (
+        <View
+          style={{
+            position: 'absolute',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: hp(100),
+            width: wp(100),
+            zIndex: 9,
+          }}>
+          <ActivityIndicator color="#d68088" size={'large'} />
+        </View>
+      )}
       <Header
         navAction="back"
-        title="Add New Shipping Address"
-        titleStyle={{fontSize: wp(4.8), fontWeight: '400'}}
+        title="Add New Billing Address"
+        titleStyle={{fontSize: wp(4.8), fontFamily: 'Roboto-Regular'}}
         style={{marginBottom: hp(3)}}
       />
 
@@ -85,6 +142,20 @@ const AddressAddNewShipping = ({navigation}) => {
 
           <TextInput
             mode="flat"
+            label="Email"
+            placeholder="Enter Email"
+            style={{
+              backgroundColor: 'transparent',
+              marginHorizontal: wp(1.5),
+            }}
+            underlineColor="#bbb"
+            activeUnderlineColor="#d68088"
+            onChangeText={text => handleInputs(text, 'last_name')}
+            value={inputs.email}
+          />
+
+          <TextInput
+            mode="flat"
             label="Street Name"
             placeholder="Enter House number and street name"
             style={{
@@ -93,8 +164,8 @@ const AddressAddNewShipping = ({navigation}) => {
             }}
             underlineColor="#bbb"
             activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'street_name')}
-            value={inputs.street_name}
+            onChangeText={text => handleInputs(text, 'address_1')}
+            value={inputs.address_1}
           />
 
           <TextInput
@@ -107,8 +178,8 @@ const AddressAddNewShipping = ({navigation}) => {
             }}
             underlineColor="#bbb"
             activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'apartment')}
-            value={inputs.apartment}
+            onChangeText={text => handleInputs(text, 'address_2')}
+            value={inputs.address_2}
           />
 
           <TextInput
@@ -135,21 +206,31 @@ const AddressAddNewShipping = ({navigation}) => {
             }}
             underlineColor="#bbb"
             activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'zip_code')}
-            value={inputs.zip_code}
+            onChangeText={text => handleInputs(text, 'postcode')}
+            value={inputs.postcode}
           />
 
           <TouchableOpacity style={styles.selecCityBox}>
-            <Text style={{fontSize: wp(4), color: '#4F4848'}}>
-              Select Country
+            <Text
+              style={{
+                fontSize: wp(4),
+                color: '#4F4848',
+                textTransform: 'capitalize',
+              }}>
+              {inputs.country || 'Select Country'}
             </Text>
             <AntDesign name="right" color="#000" size={wp(5)} />
           </TouchableOpacity>
           <View style={[styles.lineBox, {marginTop: hp(2)}]} />
 
           <TouchableOpacity style={styles.selecCityBox}>
-            <Text style={{fontSize: wp(4), color: '#4F4848'}}>
-              Select State/Province/Region
+            <Text
+              style={{
+                fontSize: wp(4),
+                color: '#4F4848',
+                textTransform: 'capitalize',
+              }}>
+              {inputs.state || 'Select State/Province/Region'}
             </Text>
             <AntDesign name="right" color="#000" size={wp(5)} />
           </TouchableOpacity>
@@ -199,7 +280,7 @@ const styles = StyleSheet.create({
 
   InformationText: {
     color: '#000',
-    fontWeight: '400',
+    fontFamily: 'Roboto-Regular',
     marginLeft: wp(4),
   },
   righArrowImage: {
@@ -216,7 +297,7 @@ const styles = StyleSheet.create({
   firstNameTextInput: {
     fontSize: wp(4),
     color: '#000',
-    fontWeight: '500',
+    fontFamily: 'Roboto-Medium',
     marginLeft: wp(4),
     marginTop: hp(-1),
   },
@@ -240,7 +321,7 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#fff',
     paddingVertical: hp(2),
-    fontWeight: '500',
+    fontFamily: 'Roboto-Medium',
   },
 
   rightArrowImage: {

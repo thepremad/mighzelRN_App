@@ -1,6 +1,6 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import {View, Text, StyleSheet} from 'react-native';
+import {View, Text, StyleSheet, TouchableHighlight} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {RectButton, TouchableOpacity} from 'react-native-gesture-handler';
 import {Image} from '@rneui/base';
@@ -10,9 +10,18 @@ import {
 } from 'react-native-responsive-screen';
 
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {async_keys, clearData, getData} from '../storage/UserPreference';
-import {CommonActions} from '@react-navigation/native';
-import {ActivityIndicator} from 'react-native-paper';
+import {
+  async_keys,
+  clearData,
+  getData,
+  removeItem,
+} from '../storage/UserPreference';
+import {CommonActions, useIsFocused} from '@react-navigation/native';
+import {ActivityIndicator, Button} from 'react-native-paper';
+import {useDispatch} from 'react-redux';
+import {setMainRoute} from '../redux/action/routeActions';
+import {fetchOrderDataRequest} from '../redux/action/orderActions';
+import {fetchCartDataRequest} from '../redux/action/cartActions';
 
 // icon
 // import ic_rightArrow from '../asserts/Image/ic_rightArrow.png';
@@ -20,15 +29,31 @@ import {ActivityIndicator} from 'react-native-paper';
 const ProfileScreen = ({navigation}) => {
   const [isLogin, setIsLogin] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [displayName, setDisplayName] = useState('');
+
+  const isFocused = useIsFocused();
+  const dispatch = useDispatch();
+
   useEffect(() => {
-    setLoader(true);
-    authenticate();
-    const timeOutId = setTimeout(() => {
-      setLoader(false);
-    }, 1000);
+    let timeOutId;
+    if (isFocused) {
+      setLoader(true);
+      authenticate();
+      timeOutId = setTimeout(() => {
+        setLoader(false);
+      }, 1000);
+    }
 
     return () => clearTimeout(timeOutId);
+  }, [isFocused]);
+
+  useEffect(() => {
+    fetchName();
   }, []);
+  const fetchName = async () => {
+    const name = await getData(async_keys.user_display_name);
+    setDisplayName(name);
+  };
 
   const authenticate = async () => {
     const auth = await getData(async_keys.auth_token);
@@ -37,13 +62,16 @@ const ProfileScreen = ({navigation}) => {
   };
 
   const handleLogin = async () => {
+    await removeItem(async_keys.skip_login_screen);
+    navigation.navigate('Logout', {
+      screen: 'LoginScreen',
+      params: {back: true},
+    });
+  };
+
+  const handleLogout = async () => {
     await clearData();
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{name: 'LogoutNavigator'}],
-      }),
-    );
+    dispatch(setMainRoute('Logout'));
   };
 
   if (loader) {
@@ -51,7 +79,7 @@ const ProfileScreen = ({navigation}) => {
       <View
         style={{
           position: 'absolute',
-          top: 10,
+          top: 40,
           height: hp(100),
           width: wp(100),
           zIndex: 9,
@@ -81,7 +109,7 @@ const ProfileScreen = ({navigation}) => {
             marginLeft: wp(4),
             marginTop: hp(2),
           }}>
-          Hello ghh
+          Hello {displayName}
         </Text>
         <Text style={styles.myAccountText}>MY ACCOUNT</Text>
         <TouchableOpacity
@@ -94,7 +122,10 @@ const ProfileScreen = ({navigation}) => {
         <View style={styles.lineBox} />
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('OrderScreen')}
+          onPress={() => {
+            navigation.navigate('OrderScreen');
+            dispatch(fetchOrderDataRequest());
+          }}
           style={[styles.dasOrImageBox, {marginTop: hp(-1)}]}>
           <Text style={styles.dashboardText}>My Order</Text>
           <AntDesign name="right" color="#999" size={wp(5)} />
@@ -102,7 +133,10 @@ const ProfileScreen = ({navigation}) => {
         <View style={[styles.lineBox, {marginTop: hp(3)}]} />
 
         <TouchableOpacity
-          onPress={() => navigation.navigate('AddressScreen')}
+          onPress={() => {
+            navigation.navigate('AddShippingAddressScreen');
+            dispatch(fetchCartDataRequest());
+          }}
           style={[styles.dasOrImageBox, {marginTop: hp(-1)}]}>
           <Text style={styles.dashboardText}>Address</Text>
           <AntDesign name="right" color="#999" size={wp(5)} />
@@ -120,8 +154,12 @@ const ProfileScreen = ({navigation}) => {
           <AntDesign name="right" color="#999" size={wp(5)} />
         </TouchableOpacity>
         <View style={styles.lineBox} />
-
-        <Text style={styles.logOutText}>LogOut</Text>
+        <TouchableHighlight
+          underlayColor="#d4d4d4"
+          onPress={handleLogout}
+          style={{alignSelf: 'flex-start', marginLeft: wp(5)}}>
+          <Text style={styles.logOutText}>LogOut</Text>
+        </TouchableHighlight>
       </View>
     </View>
   );
@@ -133,6 +171,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 
+  button: {
+    alignItems: 'center',
+    backgroundColor: '#DDDDDD',
+    padding: 10,
+  },
   homeContainer: {
     flex: 1,
   },
@@ -140,7 +183,7 @@ const styles = StyleSheet.create({
   myAccountText: {
     fontSize: wp(5),
     color: '#000',
-    fontWeight: '400',
+    fontFamily: 'Roboto-Rgular',
     marginTop: hp(4),
     marginLeft: wp(4),
   },
@@ -154,7 +197,7 @@ const styles = StyleSheet.create({
   },
   dashboardText: {
     fontSize: wp(4.2),
-    fontWeight: '400',
+    fontFamily: 'Roboto-Rgular',
     color: '#a4a4a4',
     marginLeft: wp(1),
   },
@@ -172,11 +215,10 @@ const styles = StyleSheet.create({
   },
 
   logOutText: {
-    fontSize: wp(5),
-    color: '#999',
-    marginLeft: wp(5),
-    fontWeight: '500',
-    marginTop: hp(-1),
+    fontSize: wp(4.2),
+    color: '#a4a4a4',
+    fontFamily: 'Roboto-Rgular',
+    // marginTop: hp(-1),
   },
 
   loginButtonBox: {

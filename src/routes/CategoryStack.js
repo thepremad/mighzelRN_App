@@ -10,7 +10,7 @@ const CategoryStack = () => {
   return (
     <Stack.Navigator
       initialRouteName="CategoryScreen"
-      screenOptions={{headerShown: false}}>
+      screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
       <Stack.Screen name="CategoryScreen" component={Categories} />
       <Stack.Screen
         name="ProductList-Category"

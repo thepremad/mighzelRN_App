@@ -16,11 +16,7 @@ const TabNavigator = () => {
       tabBar={props => <Footer {...props} />}>
       <Tab.Screen name="Home" component={HomeStack} />
       <Tab.Screen name="Category" component={CategoryStack} />
-      <Tab.Screen
-        name="Cart"
-        component={CartStack}
-        options={{unmountOnBlur: true}}
-      />
+      <Tab.Screen name="Cart" component={CartStack} />
       <Tab.Screen
         name="Profile"
         component={ProfileStack}

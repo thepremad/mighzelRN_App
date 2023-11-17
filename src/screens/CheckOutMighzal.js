@@ -16,31 +16,91 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 
-import {RadioButton} from 'react-native-paper';
+import {ActivityIndicator, RadioButton} from 'react-native-paper';
 import {RectButton} from 'react-native-gesture-handler';
+import Header from '../components/Header';
+import {useDispatch, useSelector} from 'react-redux';
+import {async_keys, getData} from '../storage/UserPreference';
+import {showSnack} from '../components/Snackbar';
+import {makeRequest} from '../api/ApiInfo';
+import {fetchCartDataSuccess} from '../redux/action/cartActions';
 
-const CheckOutMighzal = () => {
-  const [selected, setSelected] = useState('');
-  const [select, setSelect] = useState('');
+const CheckOutMighzal = ({navigation}) => {
+  const [selectedPayment, setSelectedPayment] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState(false);
+  const [loader, setLoader] = useState(false);
 
-  const button1 = () => {
-    setSelected('cash');
-  };
-  const button2 = () => {
-    setSelected('pay');
-  };
+  const dispatch = useDispatch();
+  const {cartData, isLoading, error} = useSelector(state => state.cart);
+  const {billing_address} = cartData;
 
-  const button3 = () => {
-    setSelect('null');
+  const handleSubmit = async () => {
+    try {
+      const token = await getData(async_keys.auth_token);
+      const customer_id = await getData(async_keys.customer_id);
+      const update = {
+        ...cartData,
+        items: [],
+        coupons: [],
+        fees: [],
+        totals: {},
+        items_count: 0,
+      };
+
+      if (Object.keys(billing_address).length === 0) {
+        showSnack('Please add billing address', null, true);
+        return true;
+      }
+
+      if (!selectedAddress) {
+        showSnack('Please select billing address', null, true);
+        return true;
+      }
+
+      if (!selectedPayment) {
+        showSnack('Please select payment option', null, true);
+        return true;
+      }
+      setLoader(true);
+      const res = await makeRequest(`create_order`, {token, customer_id}, true);
+      if (res) {
+        const {Status, Message} = res;
+        if (Status === true) {
+          showSnack(Message);
+          dispatch(fetchCartDataSuccess(update));
+          setLoader(false);
+          navigation.navigate('OrderSuccess');
+        } else {
+          setLoader(false);
+        }
+      }
+    } catch (error) {
+      setLoader(false);
+      console.log(error);
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Header title="Checkout" navAction="back" />
+      {loader && (
+        <View
+          style={{
+            position: 'absolute',
+            zIndex: 99,
+            height: hp(100),
+            width: wp(100),
+            justifyContent: 'center',
+          }}>
+          <ActivityIndicator size="large" color="#D68088" />
+        </View>
+      )}
+
       <ScrollView style={{margin: hp(0.8)}}>
         <Text
           style={{
             color: '#000000',
-            fontWeight: '500',
+            fontFamily: 'Roboto-Medium',
             margin: hp(1),
             fontSize: wp(4.5),
           }}>
@@ -50,7 +110,7 @@ const CheckOutMighzal = () => {
         <Text
           style={{
             color: '#000000',
-            fontWeight: '300',
+            fontFamily: 'Roboto-Light',
             marginHorizontal: hp(1),
             marginBottom: hp(0.5),
             marginTop: hp(1.5),
@@ -76,7 +136,7 @@ const CheckOutMighzal = () => {
             style={{
               alignSelf: 'center',
               fontSize: wp(5),
-              fontWeight: '500',
+              fontFamily: 'Roboto-Medium',
               color: '#000000',
               marginVertical: hp(1),
             }}>
@@ -90,7 +150,9 @@ const CheckOutMighzal = () => {
               marginHorizontal: wp(2.5),
             }}>
             <Text style={{color: '#000000', fontSize: wp(4)}}>Order</Text>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>30.00</Text>
+            <Text style={{color: '#000000', fontSize: wp(4)}}>
+              {cartData?.totals?.total_price}
+            </Text>
           </View>
           <View
             style={{
@@ -100,7 +162,9 @@ const CheckOutMighzal = () => {
               marginHorizontal: wp(2.5),
             }}>
             <Text style={{color: '#000000', fontSize: wp(4)}}>Delivery</Text>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>0.00</Text>
+            <Text style={{color: '#000000', fontSize: wp(4)}}>
+              {cartData?.totals?.total_discount}
+            </Text>
           </View>
           <View
             style={{
@@ -110,12 +174,20 @@ const CheckOutMighzal = () => {
               marginHorizontal: wp(2.5),
             }}>
             <Text
-              style={{color: '#000000', fontSize: wp(4), fontWeight: '500'}}>
+              style={{
+                color: '#000000',
+                fontSize: wp(4),
+                fontFamily: 'Roboto-Medium',
+              }}>
               Summary
             </Text>
             <Text
-              style={{color: '#000000', fontSize: wp(4), fontWeight: '500'}}>
-              30.00
+              style={{
+                color: '#000000',
+                fontSize: wp(4),
+                fontFamily: 'Roboto-Medium',
+              }}>
+              {cartData?.totals?.total_price}
             </Text>
           </View>
         </View>
@@ -123,16 +195,17 @@ const CheckOutMighzal = () => {
           <Text
             style={{
               color: '#000000',
-              fontWeight: '500',
+              fontFamily: 'Roboto-Medium',
               marginVertical: hp(1.2),
               fontSize: wp(4),
               marginHorizontal: wp(2.5),
             }}>
-            Shipping address
+            Billing address
           </Text>
         </View>
 
         <RectButton
+          onPress={() => navigation.navigate('AddShippingAddressScreen-Cart')}
           rippleColor={'#B04F58'}
           style={{
             height: hp(7),
@@ -142,77 +215,77 @@ const CheckOutMighzal = () => {
             marginVertical: hp(2.5),
             borderRadius: wp(1.5),
             backgroundColor: '#d68088',
-            elevation: 8,
+            elevation: 5,
           }}>
-          <Text style={{fontSize: wp(4.5), fontWeight: '500', color: '#fff'}}>
-            Add Shipping Address
+          <Text
+            style={{
+              fontSize: wp(4.5),
+              fontFamily: 'Roboto-Medium',
+              color: '#fff',
+            }}>
+            Add Billing Address
           </Text>
         </RectButton>
 
-        <View
-          style={{
-            backgroundColor: '#fff',
-            marginBottom: hp(3),
-            elevation: 3,
-          }}>
+        {billing_address && (
           <View
             style={{
-              flexDirection: 'row',
-              marginHorizontal: wp(10),
-              marginTop: hp(2),
-              // flex: 1,
-              justifyContent: 'space-between',
+              backgroundColor: '#fff',
+              marginBottom: hp(3),
+              elevation: 3,
+              paddingLeft: wp(10),
+              paddingVertical: hp(2),
             }}>
-            <View>
-              <Text
-                style={{color: '#000', fontWeight: '300', fontSize: wp(4.2)}}>
-                First Name
-              </Text>
-
-              <Text
-                style={{color: '#000', fontWeight: '300', fontSize: wp(4.2)}}>
-                Street Name
-              </Text>
-              <Text
-                style={{color: '#000', fontWeight: '300', fontSize: wp(4.2)}}>
-                Apartment
-              </Text>
-            </View>
-
-            <View>
-              <RectButton rippleColor={'#f1f1f1'}>
-                <Text
-                  onPress={() => alert('hii')}
-                  style={{
-                    color: '#EEA0A0',
-                    fontWeight: '300',
-                    fontSize: wp(4.2),
-                  }}>
-                  Change
-                </Text>
-              </RectButton>
-            </View>
-          </View>
-
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(3),
-              alignItems: 'center',
-              marginLeft: wp(10),
-            }}>
-            <RadioButton
-              uncheckedColor="#999"
-              color="#d68088"
-              value={select}
-              status={select ? 'checked' : 'unchecked'}
-              // onPress={() => setChecked(item)}
-            />
-            <Text style={[styles.radioButtonText, {fontWeight: '400'}]}>
-              Select as a shippping address
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Light',
+                fontSize: wp(4.2),
+              }}>
+              {billing_address?.first_name}
             </Text>
+
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Light',
+                fontSize: wp(4.2),
+              }}>
+              {billing_address?.address_1}
+            </Text>
+
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Light',
+                fontSize: wp(4.2),
+              }}>
+              {billing_address?.address_2}
+            </Text>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: hp(2),
+              }}>
+              <RadioButton
+                uncheckedColor="#999"
+                color="#d68088"
+                value={selectedAddress}
+                status={selectedAddress ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedAddress(!selectedAddress)}
+              />
+              <Text
+                style={[
+                  styles.radioButtonText,
+                  {fontFamily: 'Roboto-Regular'},
+                ]}>
+                Select as a shippping address
+              </Text>
+            </View>
           </View>
-        </View>
+        )}
 
         <View
           style={{
@@ -223,7 +296,7 @@ const CheckOutMighzal = () => {
           <Text
             style={{
               color: '#000000',
-              fontWeight: '500',
+              fontFamily: 'Roboto-Medium',
               marginTop: hp(1.2),
               fontSize: wp(4),
               marginHorizontal: wp(2.5),
@@ -236,15 +309,15 @@ const CheckOutMighzal = () => {
               marginVertical: hp(3),
               alignItems: 'center',
             }}>
-            <TouchableOpacity style={{marginLeft: wp(10)}} onPress={button1}>
+            <View style={{marginLeft: wp(10)}}>
               <RadioButton
                 uncheckedColor="#999"
                 color="#d68088"
-                value={true}
-                status={true ? 'checked' : 'unchecked'}
-                // onPress={() => setChecked(item)}
+                value={selectedPayment}
+                status={selectedPayment === 'cash' ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedPayment('cash')}
               />
-            </TouchableOpacity>
+            </View>
             <Text style={styles.radioButtonText}>
               Cash on delivery (kumait only)
             </Text>
@@ -255,15 +328,17 @@ const CheckOutMighzal = () => {
               marginVertical: hp(3),
               alignItems: 'center',
             }}>
-            <TouchableOpacity style={{marginLeft: wp(10)}} onPress={button2}>
+            <View style={{marginLeft: wp(10)}}>
               <RadioButton
                 uncheckedColor="#999"
                 color="#d68088"
-                value={true}
-                status={true ? 'checked' : 'unchecked'}
-                // onPress={() => setChecked(item)}
+                value={selectedPayment}
+                status={
+                  selectedPayment === 'debit_credit' ? 'checked' : 'unchecked'
+                }
+                onPress={() => setSelectedPayment('debit_credit')}
               />
-            </TouchableOpacity>
+            </View>
             <Text style={styles.radioButtonText}>
               Pay by Debit/Credit card only
             </Text>
@@ -271,6 +346,7 @@ const CheckOutMighzal = () => {
         </View>
 
         <RectButton
+          onPress={handleSubmit}
           rippleColor={'#B04F58'}
           style={{
             height: hp(7),
@@ -282,7 +358,12 @@ const CheckOutMighzal = () => {
             backgroundColor: '#d68088',
             elevation: 8,
           }}>
-          <Text style={{fontSize: wp(4.5), fontWeight: '500', color: '#fff'}}>
+          <Text
+            style={{
+              fontSize: wp(4.5),
+              fontFamily: 'Roboto-Medium',
+              color: '#fff',
+            }}>
             Submit Order
           </Text>
         </RectButton>
@@ -306,7 +387,7 @@ const styles = StyleSheet.create({
   radioButtonText: {
     alignSelf: 'center',
     fontSize: wp(4.2),
-    fontWeight: '300',
+    fontFamily: 'Roboto-Light',
     color: '#000000',
     marginLeft: wp(8),
   },

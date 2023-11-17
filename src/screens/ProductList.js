@@ -68,14 +68,11 @@ const ProductList = ({navigation, route}) => {
           keyExtractor={i => i?.product_id?.toString()}
           data={data}
           renderItem={({item, index}) => (
-            <RenderProducts
-              item={item}
-              index={index}
-              loader={loader}
-              setData={setData}
-              data={data}
-            />
+            <RenderProducts item={item} index={index} loader={loader} />
           )}
+          initialNumToRender={4}
+          maxToRenderPerBatch={6}
+          windowSize={6}
         />
       )}
     </View>

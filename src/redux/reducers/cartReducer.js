@@ -5,7 +5,14 @@ import {
 } from '../action/ActionTypes';
 
 const initialHomeState = {
-  cartData: [],
+  cartData: {
+    items: [],
+    coupons: [],
+    fees: [],
+    totals: {},
+    items_count: 0,
+    billing_address: {},
+  },
   isLoading: false,
   shimmer: true,
   error: null,
@@ -17,12 +24,12 @@ const cartReducer = (state = initialHomeState, action) => {
       console.log(FETCH_CART_DATA_REQUEST);
       return {
         ...state,
-        isLoading: state.cartData.length === 0,
+        isLoading: true,
         shimmer: true,
         error: null,
       };
     case FETCH_CART_DATA_SUCCESS:
-      console.log(FETCH_CART_DATA_SUCCESS);
+      console.log(FETCH_CART_DATA_SUCCESS, action.payload);
       return {
         ...state,
         cartData: action.payload,
@@ -33,7 +40,13 @@ const cartReducer = (state = initialHomeState, action) => {
       console.log(FETCH_CART_DATA_FAILURE);
       return {
         ...state,
-        cartData: [],
+        cartData: {
+          items: [],
+          coupons: [],
+          fees: [],
+          totals: {},
+          items_count: 0,
+        },
         isLoading: false,
         shimmer: false,
         error: action.payload,

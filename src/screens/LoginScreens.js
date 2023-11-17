@@ -22,24 +22,26 @@ import Fontisto from 'react-native-vector-icons/Fontisto';
 import ic_email from '../assets/icons/ic_email.png';
 import ic_password from '../assets/icons/ic_password.png';
 import {RectButton} from 'react-native-gesture-handler';
-import {async_keys, storeData} from '../storage/UserPreference';
+import {async_keys, getData, storeData} from '../storage/UserPreference';
 import {CommonActions} from '@react-navigation/native';
 import {isValidEmail} from '../authentication/auth';
 import CustomSnack from '../components/CustomSnack';
 import {ActivityIndicator, Icon, TextInput} from 'react-native-paper';
-import {makeRequest} from '../api/ApiInfo';
+import {BASE_URL, makeRequest} from '../api/ApiInfo';
 import {showSnack} from '../components/Snackbar';
+import {useDispatch} from 'react-redux';
+import {setMainRoute} from '../redux/action/routeActions';
 
-const LoginScreens = ({navigation}) => {
+const LoginScreens = ({navigation, route}) => {
+  // console.log('route', route);
   // using state
-  const [visible, setVisible] = useState(false);
-  const [error, setError] = useState(false);
   const [loader, setLoader] = useState(false);
-  const [snackText, setSnackText] = useState('');
   const [inputs, setInputs] = useState({
     email: '',
     password: '',
   });
+
+  const dispatch = useDispatch();
 
   const handleInputs = (value, key) => {
     setInputs({...inputs, [key]: value});
@@ -47,18 +49,58 @@ const LoginScreens = ({navigation}) => {
 
   const handleSkip = async () => {
     await storeData(async_keys.skip_login_screen, true);
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{name: 'LoginNavigator'}],
-      }),
-    );
+
+    if (!route?.params?.back) {
+      navigation.goBack();
+    } else {
+      dispatch(setMainRoute('Login'));
+    }
+  };
+
+  const addingInCart = async token => {
+    let isSuccess;
+    try {
+      const cartData = await getData(async_keys.cart_data);
+      if (cartData && cartData.length !== 0) {
+        const params = cartData?.items?.map(({product_id, quantity}) => ({
+          product_id,
+          quantity,
+        }));
+        var myHeaders = new Headers();
+        myHeaders.append('Content-Type', 'application/json');
+        var raw = JSON.stringify(params);
+        var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: raw,
+          redirect: 'follow',
+        };
+        const resp = await fetch(
+          `${BASE_URL}add_to_cart_all?token=${token}`,
+          requestOptions,
+        );
+        const result = await resp.json();
+        console.log(`add_to_cart_all`, {result, requestOptions});
+        if (result) {
+          //LOADER
+          setLoader(false);
+          const {Status, Message} = result;
+          isSuccess = Status;
+        }
+      } else {
+        setLoader(false);
+        isSuccess = true;
+      }
+    } catch (error) {
+      setLoader(false);
+      isSuccess = false;
+      console.log('addingInCart', error);
+    }
+    return isSuccess;
   };
 
   const handleLogin = async () => {
     const {email, password} = inputs;
-
-    console.log(!isValidEmail(email));
 
     if (!isValidEmail(email)) {
       showSnack('Please enter valid email!', null, true);
@@ -73,31 +115,40 @@ const LoginScreens = ({navigation}) => {
     }
 
     try {
+      //LOADER
       setLoader(true);
+
       const params = {username: email, password};
       const result = await makeRequest(`login`, params, true);
       if (result) {
         const {Status, Message} = result;
         if (Status === true) {
+          console.log(`login-resp`, result);
           const {Data} = result;
           await storeData(async_keys.auth_token, Data.token);
           await storeData(async_keys.user_display_name, Data.user_display_name);
-          showSnack(Message);
+          await storeData(async_keys.customer_id, Data.customer_id);
 
-          setInputs({
-            fullName: '',
-            email: '',
-            password: '',
-          });
-          setLoader(false);
+          const successfully_added = await addingInCart(Data.token);
 
-          handleSkip();
+          if (successfully_added) {
+            handleSkip();
+            setInputs({
+              fullName: '',
+              email: '',
+              password: '',
+            });
+          } else {
+            showSnack(`Something went wrong please login again`, null, true);
+          }
         } else {
+          //LOADER
           setLoader(false);
           showSnack(Message, null, true);
         }
       }
     } catch (error) {
+      setLoader(false);
       console.log('handleLogin()', error);
     }
   };
@@ -120,7 +171,7 @@ const LoginScreens = ({navigation}) => {
       <Text
         onPress={handleSkip}
         style={{fontSize: wp(4), color: '#555', margin: wp(3)}}>
-        Skip
+        {route?.params?.back ? '' : 'Skip'}
       </Text>
 
       <View style={styles.homeContainer}>
@@ -171,7 +222,12 @@ const LoginScreens = ({navigation}) => {
           value={inputs.password}
         />
 
-        <TouchableOpacity>
+        <TouchableOpacity
+          style={{
+            alignSelf: 'flex-end',
+            marginVertical: hp(1),
+            marginRight: wp(2),
+          }}>
           <Text style={styles.forgetPasswordText}>Forgot Password</Text>
         </TouchableOpacity>
 
@@ -179,7 +235,7 @@ const LoginScreens = ({navigation}) => {
           <Text style={styles.loginButtonText}>Login</Text>
         </RectButton>
 
-        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+        <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
           <Text style={styles.registerHereText}>Register here</Text>
         </TouchableOpacity>
       </View>
@@ -201,7 +257,7 @@ const styles = StyleSheet.create({
     fontSize: wp(6),
     color: '#000',
     alignSelf: 'center',
-    fontWeight: '600',
+    fontFamily: 'Roboto-Bold',
     marginVertical: hp(5),
     marginBottom: hp(10),
   },
@@ -209,10 +265,7 @@ const styles = StyleSheet.create({
   forgetPasswordText: {
     fontSize: wp(4),
     color: '#3a3a3a',
-    fontWeight: '500',
-    textAlign: 'right',
-    marginRight: wp(4),
-    marginVertical: hp(1),
+    fontFamily: 'Roboto-Medium',
   },
 
   loginButtonBox: {
@@ -228,7 +281,7 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#fff',
     paddingVertical: hp(1.5),
-    fontWeight: '500',
+    fontFamily: 'Roboto-Medium',
   },
 
   registerHereText: {

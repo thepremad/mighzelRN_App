@@ -14,6 +14,10 @@ const initialHomeState = {
   homeDataFirst: {},
   homeDataSecond: {},
   homeDataThird: {},
+  addresses: {
+    billing_address: {},
+    shipping_address: {},
+  },
 
   isLoadingFirst: false,
   isLoadingSecond: false,

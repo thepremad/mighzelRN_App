@@ -100,7 +100,7 @@ const SearchScreen = ({navigation}) => {
             renderItem={({item}) => (
               <Text
                 style={{
-                  fontWeight: '300',
+                  fontFamily: 'Roboto-Light',
                   marginVertical: hp(1),
                   marginHorizontal: wp(4),
                 }}>

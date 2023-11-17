@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
   orderDetilText: {
     fontSize: wp(4),
     color: '#d68088',
-    fontWeight: '600',
+    fontFamily: 'Roboto-Bold',
     marginTop: hp(4),
     marginLeft: wp(2),
   },
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   productText: {
     fontSize: wp(4),
     color: '#000',
-    fontWeight: '400',
+    fontFamily: 'Roboto-Regular',
   },
 
   BillingBox: {

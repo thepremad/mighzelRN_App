@@ -2,7 +2,7 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable prettier/prettier */
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Text, View, FlatList, StyleSheet} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {
@@ -10,8 +10,11 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import {RectButton} from 'react-native-gesture-handler';
+import OrderListShimmer from '../shimmers/OrderListShimmer';
+import {useSelector} from 'react-redux';
 
 const DeliveredScreen = ({navigation}) => {
+  const [loader, setLoader] = useState(true);
   const [list, setList] = useState([
     {
       id: 1,
@@ -39,6 +42,17 @@ const DeliveredScreen = ({navigation}) => {
     },
   ]);
 
+  const {orderData, isLoading, shimmer, error} = useSelector(
+    state => state.order,
+  );
+
+  const data = orderData.filter(item => item.status === 'delivered');
+
+  useEffect(() => {
+    const timeOutID = setTimeout(() => setLoader(false), 3000);
+    return () => clearTimeout(timeOutID);
+  }, []);
+
   const ItemView = ({item}) => {
     return (
       <RectButton
@@ -62,7 +76,7 @@ const DeliveredScreen = ({navigation}) => {
               color: '#838383',
               marginLeft: 'auto',
             }}>
-            {item.date}
+            {item.date_created}
           </Text>
 
           <Text
@@ -71,7 +85,7 @@ const DeliveredScreen = ({navigation}) => {
               fontFamily: 'Roboto-Bold',
               color: '#000',
             }}>
-            {item.trackingNumber}
+            {item.order_id}
             {'\n'}Tracking No:
           </Text>
 
@@ -107,7 +121,7 @@ const DeliveredScreen = ({navigation}) => {
                   fontFamily: 'Roboto-Bold',
                   color: '#000',
                 }}>
-                {item.totalAmount}
+                {item.total} KWD
               </Text>
             </Text>
           </View>
@@ -118,6 +132,7 @@ const DeliveredScreen = ({navigation}) => {
               fontFamily: 'Roboto-Regular',
               color: 'green',
               marginLeft: 'auto',
+              textTransform: 'capitalize',
             }}>
             {item.status}
           </Text>
@@ -129,14 +144,23 @@ const DeliveredScreen = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.homeContainer}>
-        <FlatList
-          data={list}
-          renderItem={ItemView}
-          keyExtractor={(item, index) => index.toString()}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-          contentContainerStyle={{paddingBottom: hp(1)}}
-        />
+        {isLoading ? (
+          <OrderListShimmer />
+        ) : (
+          <FlatList
+            data={data}
+            renderItem={ItemView}
+            ListEmptyComponent={() => (
+              <View style={{alignItems: 'center'}}>
+                <Text style={{}}>No data found !</Text>
+              </View>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{paddingBottom: hp(1)}}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
