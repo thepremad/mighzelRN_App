@@ -4,6 +4,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Categories from '../screens/Categories';
 import CategoryProductList from '../screens/CategoryProductList';
 import ProductDetails from '../screens/ProductDetails';
+import SearchScreen from '../screens/SearchScreen';
 
 const CategoryStack = () => {
   const Stack = createNativeStackNavigator();
@@ -17,6 +18,7 @@ const CategoryStack = () => {
         component={CategoryProductList}
       />
       <Stack.Screen name="ProductDetails-Category" component={ProductDetails} />
+      <Stack.Screen name="SearchScreen-Category" component={SearchScreen} />
     </Stack.Navigator>
   );
 };

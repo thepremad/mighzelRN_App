@@ -1,16 +1,8 @@
-/* eslint-disable react/no-unstable-nested-components */
-/* eslint-disable no-undef */
 /* eslint-disable prettier/prettier */
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  useMemo,
-  memo,
-  useCallback,
-} from 'react';
+import React, {useState, useEffect, useMemo, memo, useCallback} from 'react';
 import {
   Text,
   View,
@@ -27,32 +19,27 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import Carousel from 'react-native-snap-carousel';
-import {useIsFocused} from '@react-navigation/native';
+// import {useIsFocused} from '@react-navigation/native';
 
-import {ActivityIndicator} from 'react-native-paper';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 import Fontisto from 'react-native-vector-icons/Fontisto';
-import {FlashList} from '@shopify/flash-list';
 
 import {async_keys, getData} from '../storage/UserPreference';
 import {useDispatch, useSelector} from 'react-redux';
 import {
-  fetchHomeDataFirstRequest,
   fetchHomeDataSecondRequest,
   fetchHomeDataThirdRequest,
 } from '../redux/action/homeActions';
 
 import img_headerLogo from '../assets/images/home_header_logo.png';
+// import img_headerLogo from '../assets/images/Master-Logo.png';
 import RenderProducts from '../components/RenderProducts';
 import HomeShimmer from '../shimmers/HomeShimmer';
-import HomeBannerShimmer from '../shimmers/HomeBannerShimmer';
 import FastImage from 'react-native-fast-image';
 import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 
 const HomeScreen = ({navigation}) => {
   const [displayName, setDisplayName] = useState('');
   const [bannerLoader, setBannerLoader] = useState(true);
-  const [mainLoader, setMainLoader] = useState(true);
   const [bannerList, setBannerList] = useState([
     {
       id: 1,
@@ -70,56 +57,56 @@ const HomeScreen = ({navigation}) => {
         'https://mighzalalarab.com/wp-content/uploads/2023/08/DSC_0080-1367x2048.jpg',
     },
   ]);
-  const [newArrival, setNewArrival] = useState([
-    {
-      id: 1,
-      image:
-        'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
-      name: 'CHONA HALO STUDS',
-      price: '10.00 KWD',
-      dropPrice: null,
-    },
-    {
-      id: 2,
-      image:
-        'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
-      name: 'BLOSSOMS STUD EARRINGS',
-      price: '10.00 KWD',
-      dropPrice: null,
-    },
-    {
-      id: 3,
-      image:
-        'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
-      name: 'BEXLEY RING',
-      price: '10.00 KWD',
-      dropPrice: '10.00 KWD',
-    },
-    {
-      id: 4,
-      image:
-        'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
-      name: 'MHARLI NECKLACE AND EARRING SET',
-      price: '45.00 KWD',
-      dropPrice: null,
-    },
-  ]);
+  // const [newArrival, setNewArrival] = useState([
+  //   {
+  //     id: 1,
+  //     image:
+  //       'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
+  //     name: 'CHONA HALO STUDS',
+  //     price: '10.00 KWD',
+  //     dropPrice: null,
+  //   },
+  //   {
+  //     id: 2,
+  //     image:
+  //       'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
+  //     name: 'BLOSSOMS STUD EARRINGS',
+  //     price: '10.00 KWD',
+  //     dropPrice: null,
+  //   },
+  //   {
+  //     id: 3,
+  //     image:
+  //       'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
+  //     name: 'BEXLEY RING',
+  //     price: '10.00 KWD',
+  //     dropPrice: '10.00 KWD',
+  //   },
+  //   {
+  //     id: 4,
+  //     image:
+  //       'https://mighzalalarab.com/wp-content/uploads/2023/10/IMG_8356.jpg',
+  //     name: 'MHARLI NECKLACE AND EARRING SET',
+  //     price: '45.00 KWD',
+  //     dropPrice: null,
+  //   },
+  // ]);
 
-  const isFocus = useIsFocused();
+  // const isFocus = useIsFocused();
   const dispatch = useDispatch();
   const {
     homeDataFirst,
     homeDataSecond,
     homeDataThird,
-    isLoadingFirst,
-    isLoadingSecond,
-    isLoadingThird,
+    // isLoadingFirst,
+    // isLoadingSecond,
+    // isLoadingThird,
     shimmerFirst,
     shimmerSecond,
     shimmerThird,
-    errorFirst,
-    errorSecond,
-    errorThird,
+    // errorFirst,
+    // errorSecond,
+    // errorThird,
   } = useSelector(state => state.home);
 
   // console.log(homeDataFirst);
@@ -170,7 +157,7 @@ const HomeScreen = ({navigation}) => {
         category_name,
       });
     },
-    [homeDataFirst, homeDataSecond, homeDataThird],
+    [navigation],
   );
 
   const Header = ({title, name}) => (
@@ -179,7 +166,8 @@ const HomeScreen = ({navigation}) => {
 
       <Image
         source={img_headerLogo}
-        style={{width: wp(40), aspectRatio: 2048 / 492}}
+        style={{width: wp(40), aspectRatio: 4041 / 970}}
+        resizeMode="stretch"
       />
 
       <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -192,9 +180,14 @@ const HomeScreen = ({navigation}) => {
             width: wp(25),
             fontSize: wp(3.4),
           }}>
-          WELCOME{name ? `\n` + name : null}
+          WELCOME{name ? '\n' + name : null}
         </Text>
-        <TouchableOpacity onPress={handleSearch}>
+        <TouchableOpacity
+          style={{
+            padding: wp(1.5),
+            marginLeft: wp(1),
+          }}
+          onPress={handleSearch}>
           <Fontisto name="search" color="#d68088" size={wp(5)} />
         </TouchableOpacity>
       </View>
@@ -217,13 +210,13 @@ const HomeScreen = ({navigation}) => {
     },
   });
 
-  const onEndReached = () => {
-    if (Object.keys(homeDataSecond).length < 1) {
-      dispatch(fetchHomeDataSecondRequest());
-    } else if (Object.keys(homeDataThird).length < 1) {
-      dispatch(fetchHomeDataThirdRequest());
-    }
-  };
+  // const onEndReached = () => {
+  //   if (Object.keys(homeDataSecond).length < 1) {
+  //     dispatch(fetchHomeDataSecondRequest());
+  //   } else if (Object.keys(homeDataThird).length < 1) {
+  //     dispatch(fetchHomeDataThirdRequest());
+  //   }
+  // };
 
   const RenderHomeItem = useMemo(
     () =>
@@ -266,8 +259,7 @@ const HomeScreen = ({navigation}) => {
               data={item?.product_data}
               keyExtractor={i => i?.product_id?.toString()}
               renderItem={i => {
-                const prod = i.item;
-                return <RenderProducts item={prod} />;
+                return <RenderProducts item={i.item} />;
               }}
               numColumns={2}
               // disableVirtualization={true}
@@ -283,7 +275,7 @@ const HomeScreen = ({navigation}) => {
           </View>
         );
       }),
-    [bannerList, handleProductMighzal],
+    [handleProductMighzal],
   );
 
   return (
@@ -367,7 +359,6 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: wp(5),
-    fontFamily: 'Roboto-Medium',
     color: '#cf8385',
     textAlign: 'center',
     marginVertical: hp(2),

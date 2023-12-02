@@ -11,6 +11,7 @@ const HomeShimmer = ({children}) => {
   return (
     <View style={{flex: 1}}>
       <FlatList
+        scrollEnabled={false}
         data={[1]}
         renderItem={({item, index}) => (
           <View style={{flex: 1}}>

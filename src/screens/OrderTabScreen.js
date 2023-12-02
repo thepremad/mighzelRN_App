@@ -17,8 +17,6 @@ import ProcessingScreen from '../components/ProcessingScreen';
 import CancelledScreen from '../components/CancelledScreen';
 import DeliveredScreen from '../components/DeliveredScreen';
 import Header from '../components/Header';
-import {connect} from 'react-redux';
-import {fetchOrderDataRequest} from '../redux/action/orderActions';
 
 class OrderTabScreen extends Component {
   constructor(props) {

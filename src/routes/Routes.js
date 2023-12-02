@@ -4,6 +4,7 @@ import LoggedOutNavigator from './LoggedOutNavigator';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {useSelector} from 'react-redux';
 import SplashScreen from '../screens/SplashScreen';
+import PaymentUI from '../payment_gateway/PaymentUI';
 
 const Routes = ({skipLogin}) => {
   const {mainRoute} = useSelector(state => state.route);
@@ -15,9 +16,10 @@ const Routes = ({skipLogin}) => {
         headerShown: false,
         navigationBarHidden: true,
         statusBarHidden: true,
-        statusBarTranslucent: true,
+        // statusBarTranslucent: true,
         statusBarColor: 'transparent',
         statusBarStyle: 'dark',
+        // statusBarAnimation: 'slide',
       }}>
       <Stack.Screen name="Splash" component={SplashScreen} options={{}} />
     </Stack.Navigator>

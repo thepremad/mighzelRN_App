@@ -99,8 +99,8 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    // aspectRatio: 1 / 1,
-    height: hp(20),
+    aspectRatio: 1 / 1,
+    // height: hp(21),
   },
   nameText: {
     fontSize: wp(3.8),

@@ -10,7 +10,7 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -24,29 +24,22 @@ import {async_keys, getData} from '../storage/UserPreference';
 import {showSnack} from '../components/Snackbar';
 import {makeRequest} from '../api/ApiInfo';
 import {fetchCartDataSuccess} from '../redux/action/cartActions';
+import PaymentUI from '../payment_gateway/PaymentUI';
 
-const CheckOutMighzal = ({navigation}) => {
+const CheckOutMighzal = ({navigation, route}) => {
   const [selectedPayment, setSelectedPayment] = useState('');
   const [selectedAddress, setSelectedAddress] = useState(false);
   const [loader, setLoader] = useState(false);
+  const [paymentLoader, setPaymentLoader] = useState(false);
 
   const dispatch = useDispatch();
   const {cartData, isLoading, error} = useSelector(state => state.cart);
   const {billing_address} = cartData;
 
-  const handleSubmit = async () => {
-    try {
-      const token = await getData(async_keys.auth_token);
-      const customer_id = await getData(async_keys.customer_id);
-      const update = {
-        ...cartData,
-        items: [],
-        coupons: [],
-        fees: [],
-        totals: {},
-        items_count: 0,
-      };
+  console.log('cartData', cartData);
 
+  const handleSubmit = async startPayment => {
+    try {
       if (Object.keys(billing_address).length === 0) {
         showSnack('Please add billing address', null, true);
         return true;
@@ -61,21 +54,58 @@ const CheckOutMighzal = ({navigation}) => {
         showSnack('Please select payment option', null, true);
         return true;
       }
+
+      if (selectedPayment === 'cash') {
+        createOrder();
+      } else {
+        startPayment(createOrder, setLoader);
+      }
+    } catch (error) {
+      setLoader(false);
+      console.log(error);
+    }
+  };
+
+  const createOrder = async () => {
+    try {
       setLoader(true);
-      const res = await makeRequest(`create_order`, {token, customer_id}, true);
+      const token = await getData(async_keys.auth_token);
+      const customer_id = await getData(async_keys.customer_id);
+      const coupon_code = route?.params?.couponCode || '';
+
+      const update = {
+        ...cartData,
+        items: [],
+        coupons: [],
+        fees: [],
+        totals: {
+          total_price: 0,
+          total_discount: 0,
+        },
+        items_count: 0,
+      };
+
+      const params = {
+        token,
+        customer_id,
+      };
+      if (coupon_code) {
+        params.coupon_code = coupon_code;
+      }
+
+      const res = await makeRequest(`create_order`, params, true);
       if (res) {
         const {Status, Message} = res;
         if (Status === true) {
           showSnack(Message);
           dispatch(fetchCartDataSuccess(update));
           setLoader(false);
-          navigation.navigate('OrderSuccess');
+          navigation.navigate('OrderSuccess', {data: res.Data});
         } else {
           setLoader(false);
         }
       }
     } catch (error) {
-      setLoader(false);
       console.log(error);
     }
   };
@@ -151,7 +181,7 @@ const CheckOutMighzal = ({navigation}) => {
             }}>
             <Text style={{color: '#000000', fontSize: wp(4)}}>Order</Text>
             <Text style={{color: '#000000', fontSize: wp(4)}}>
-              {cartData?.totals?.total_price}
+              {route?.params?.total_price}
             </Text>
           </View>
           <View
@@ -163,7 +193,7 @@ const CheckOutMighzal = ({navigation}) => {
             }}>
             <Text style={{color: '#000000', fontSize: wp(4)}}>Delivery</Text>
             <Text style={{color: '#000000', fontSize: wp(4)}}>
-              {cartData?.totals?.total_discount}
+              {/* {cartData?.totals?.total_discount} */}0
             </Text>
           </View>
           <View
@@ -187,7 +217,7 @@ const CheckOutMighzal = ({navigation}) => {
                 fontSize: wp(4),
                 fontFamily: 'Roboto-Medium',
               }}>
-              {cartData?.totals?.total_price}
+              {route?.params?.total_price}
             </Text>
           </View>
         </View>
@@ -208,7 +238,7 @@ const CheckOutMighzal = ({navigation}) => {
           onPress={() => navigation.navigate('AddShippingAddressScreen-Cart')}
           rippleColor={'#B04F58'}
           style={{
-            height: hp(7),
+            height: hp(5),
             alignItems: 'center',
             justifyContent: 'center',
             marginHorizontal: wp(4),
@@ -345,28 +375,10 @@ const CheckOutMighzal = ({navigation}) => {
           </View>
         </View>
 
-        <RectButton
-          onPress={handleSubmit}
-          rippleColor={'#B04F58'}
-          style={{
-            height: hp(7),
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginHorizontal: wp(4),
-            marginVertical: hp(2.5),
-            borderRadius: wp(1.5),
-            backgroundColor: '#d68088',
-            elevation: 8,
-          }}>
-          <Text
-            style={{
-              fontSize: wp(4.5),
-              fontFamily: 'Roboto-Medium',
-              color: '#fff',
-            }}>
-            Submit Order
-          </Text>
-        </RectButton>
+        <PaymentUI
+          amount={route?.params?.total_price}
+          handleSubmit={handleSubmit}
+        />
       </ScrollView>
     </View>
   );

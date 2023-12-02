@@ -83,11 +83,11 @@ const ProcessingScreen = ({navigation}) => {
     return () => clearTimeout(timeOutID);
   }, []);
 
-  const data = orderData.filter(item => item.status === 'pending');
+  const data = orderData.filter(item => item?.status === 'processing');
   const ItemView = ({item}) => {
     return (
       <RectButton
-        onPress={() => navigation.navigate('OrderDetailsScreen')}
+        onPress={() => navigation.navigate('OrderDetailsScreen', {item})}
         style={{
           marginHorizontal: wp(1),
           backgroundColor: '#fff',
@@ -107,7 +107,7 @@ const ProcessingScreen = ({navigation}) => {
               color: '#838383',
               marginLeft: 'auto',
             }}>
-            {item.date_created}
+            {item?.date_created}
           </Text>
 
           <Text
@@ -116,7 +116,7 @@ const ProcessingScreen = ({navigation}) => {
               fontFamily: 'Roboto-Bold',
               color: '#000',
             }}>
-            {item.order_id}
+            {item?.order_number}
             {'\n'}Tracking No:
           </Text>
 
@@ -134,7 +134,7 @@ const ProcessingScreen = ({navigation}) => {
                   fontFamily: 'Roboto-Bold',
                   color: '#999',
                 }}>
-                {item.quantity}
+                {item?.quantity}
               </Text>
             </Text>
 
@@ -152,7 +152,7 @@ const ProcessingScreen = ({navigation}) => {
                   fontFamily: 'Roboto-Bold',
                   color: '#000',
                 }}>
-                {item.total} KWD
+                {item?.total} KWD
               </Text>
             </Text>
           </View>
@@ -165,7 +165,7 @@ const ProcessingScreen = ({navigation}) => {
               marginLeft: 'auto',
               textTransform: 'capitalize',
             }}>
-            {item.status}
+            {item?.status}
           </Text>
         </View>
       </RectButton>

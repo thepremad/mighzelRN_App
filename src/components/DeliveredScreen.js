@@ -46,6 +46,8 @@ const DeliveredScreen = ({navigation}) => {
     state => state.order,
   );
 
+  console.log(orderData);
+
   const data = orderData.filter(item => item.status === 'delivered');
 
   useEffect(() => {

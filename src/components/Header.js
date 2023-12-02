@@ -28,20 +28,31 @@ const Header = ({
   return (
     <View style={[styles.header, style]}>
       <StatusBar backgroundColor={'#fff'} barStyle="dark-content" />
-      <View style={{flexDirection: 'row', alignItems: 'center'}}>
+      <View style={{flexDirection: 'row', alignItems: 'center', flex: 1}}>
         {navAction === 'back' && (
           <TouchableOpacity
             activeOpacity={1}
             onPress={() => navigation.goBack()}
-            style={{borderRadius: hp(10)}}>
+            style={{
+              borderRadius: hp(10),
+              padding: wp(1.5),
+            }}>
             <AntDesign name="arrowleft" color="#d68088" size={wp(5)} />
           </TouchableOpacity>
         )}
 
-        <Text style={[styles.headerTitle, titleStyle]}>{title}</Text>
+        <Text numberOfLines={1} style={[styles.headerTitle, titleStyle]}>
+          {title}
+        </Text>
       </View>
       {search && (
-        <TouchableOpacity onPress={handleSearch}>
+        <TouchableOpacity
+          style={{
+            padding: wp(1.5),
+            marginLeft: wp(2),
+          }}
+          activeOpacity={1}
+          onPress={handleSearch}>
           <Fontisto name="search" color="#d68088" size={wp(5)} />
         </TouchableOpacity>
       )}
@@ -58,12 +69,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     paddingHorizontal: wp(4),
     paddingVertical: hp(1),
-    paddingTop: hp(2),
     backgroundColor: '#fff',
+    // borderWidth: 1,
   },
   headerTitle: {
     color: '#000',
     fontSize: wp(4),
-    marginLeft: wp(6),
+    marginHorizontal: wp(6),
+    flex: 1,
   },
 });

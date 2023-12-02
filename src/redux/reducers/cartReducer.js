@@ -9,7 +9,10 @@ const initialHomeState = {
     items: [],
     coupons: [],
     fees: [],
-    totals: {},
+    totals: {
+      total_price: 0,
+      total_discount: 0,
+    },
     items_count: 0,
     billing_address: {},
   },
@@ -40,13 +43,7 @@ const cartReducer = (state = initialHomeState, action) => {
       console.log(FETCH_CART_DATA_FAILURE);
       return {
         ...state,
-        cartData: {
-          items: [],
-          coupons: [],
-          fees: [],
-          totals: {},
-          items_count: 0,
-        },
+        cartData: initialHomeState.cartData,
         isLoading: false,
         shimmer: false,
         error: action.payload,

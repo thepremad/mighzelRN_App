@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {View, Text, Image, StyleSheet, SafeAreaView} from 'react-native';
 import React from 'react';
 import {
@@ -5,12 +6,38 @@ import {
   heightPercentageToDP as hp,
   heightPercentageToDP,
 } from 'react-native-responsive-screen';
-import {Icon} from 'react-native-paper';
+import {ActivityIndicator, Icon} from 'react-native-paper';
 import {useSelector} from 'react-redux';
+import WebView from 'react-native-webview';
 
-const OrderScreen = () => {
+const OrderScreen = ({navigation, route}) => {
   const {billing_address} = useSelector(state => state.cart.cartData);
-  console.log(billing_address);
+  const data = route?.params?.data;
+
+  console.log('data', data);
+
+  // return (
+  //   <WebView
+  //     source={{uri: route?.params?.payment_url}}
+  //     // source={{
+  //     //   uri: 'https://mighzalalarab.com/checkout/order-pay/47210/?pay_for_order=true&key=wc_order_7SBMk6x1Bqg4U',
+  //     // }}
+  //     style={{
+  //       flex: 1,
+  //     }}
+  //     renderLoading={() => (
+  //       <View style={{flex: 1}}>
+  //         <ActivityIndicator color="#d68088" size="large" />
+  //       </View>
+  //     )}
+  //     loa
+  //     // textZoom={250}
+  //     // scrollEnabled={false}
+  //     showsHorizontalScrollIndicator={false}
+  //     showsVerticalScrollIndicator={false}
+  //     // injectedJavaScript={cutomScript}
+  //   />
+  // );
   return (
     <SafeAreaView style={styles.container}>
       <View

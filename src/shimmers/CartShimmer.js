@@ -22,6 +22,7 @@ const CartShimmer = () => {
               marginVertical={hp(2)}
               marginHorizontal={wp(3)}
               borderBottomWidth={2}
+              borderColor="#E1E9EE"
               justifyContent="center">
               <SkeletonPlaceholder.Item width={wp(30)} height={hp(2)} />
               <SkeletonPlaceholder.Item
@@ -37,6 +38,7 @@ const CartShimmer = () => {
                   right: 10,
                   top: -15,
                   borderWidth: 1,
+                  borderColor: '#E1E9EE',
                 }}>
                 <SkeletonPlaceholder.Item width={wp(20)} height={hp(2)} />
               </SkeletonPlaceholder.Item>
@@ -48,7 +50,6 @@ const CartShimmer = () => {
             <SkeletonPlaceholder.Item
               style={{
                 height: hp(50),
-                elevation: 3,
                 borderRadius: wp(1),
                 marginVertical: hp(1.5),
                 marginHorizontal: wp(3),

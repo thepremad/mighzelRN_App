@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable react-native/no-inline-styles */
 import {
   FlatList,
@@ -184,56 +185,7 @@ const ProductDetails = ({navigation, route}) => {
     }
   };
 
-  console.log('setData', data);
-
-  const renderRelatedProduct = ({item}) => {
-    return (
-      <TouchableOpacity
-        activeOpacity={0.5}
-        style={{
-          width: '46%',
-          alignItems: 'center',
-          marginHorizontal: wp(2),
-          marginVertical: hp(1),
-        }}>
-        <FastImage
-          source={{
-            uri: item?.images[0],
-            cache: FastImage.cacheControl.immutable,
-            priority: FastImage.priority.normal,
-          }}
-          style={{height: wp(40), width: '100%'}}
-          resizeMode={FastImage.resizeMode.cover}
-        />
-
-        <Text
-          numberOfLines={1}
-          style={{
-            fontSize: wp(3.8),
-            fontFamily: 'Roboto-Medium',
-            color: '#000',
-            marginTop: hp(1),
-            textTransform: 'capitalize',
-          }}>
-          {item.product_name}
-        </Text>
-
-        <WebView
-          scrollEnabled={false}
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-          source={{html: item?.price_html}}
-          style={[
-            {
-              height: hp(2.3),
-            },
-          ]}
-          // textZoom={280}
-          // injectedJavaScript={cutomScript}
-        />
-      </TouchableOpacity>
-    );
-  };
+  // console.log('setData', data);
 
   return loader ? (
     <ProductDetailShimmer />

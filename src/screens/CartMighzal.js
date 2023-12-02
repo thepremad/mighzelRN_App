@@ -12,8 +12,9 @@ import {
   Image,
   FlatList,
   StatusBar,
+  ScrollView,
 } from 'react-native';
-import React, {memo, useEffect, useMemo, useState} from 'react';
+import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
@@ -32,7 +33,7 @@ import {
   removeItem,
   storeData,
 } from '../storage/UserPreference';
-import {CommonActions} from '@react-navigation/native';
+import {CommonActions, useIsFocused} from '@react-navigation/native';
 import {RectButton} from 'react-native-gesture-handler';
 import {ActivityIndicator, Button, Portal} from 'react-native-paper';
 import {useDispatch, useSelector} from 'react-redux';
@@ -47,21 +48,107 @@ import FastImage from 'react-native-fast-image';
 
 const CartMighzal = ({navigation}) => {
   const [visibleID, setVisibleID] = useState(null);
+  const [couponCode, setCouponCode] = useState('');
   const [quantity_limits, setQuantity_limits] = useState({});
   const [loader, setLoader] = useState(false);
   const dispatch = useDispatch();
   const {cartData, isLoading, error} = useSelector(state => state.cart);
-
+  const focus = useIsFocused();
   console.log('cart', {cartData, isLoading, error});
 
   useEffect(() => {
+    if (!focus) {
+      setCouponCode('');
+
+      const {total_price, total_discount} = cartData?.totals;
+
+      const dataToSave = {
+        ...cartData,
+        totals: {
+          ...cartData.totals,
+          total_price: Number(total_price) + Number(total_discount),
+          total_discount: 0,
+        },
+      };
+
+      dispatch(fetchCartDataSuccess(dataToSave));
+    }
+  }, [focus]);
+
+  useEffect(() => {
     dispatch(fetchCartDataRequest());
-  }, []);
+  }, [dispatch]);
+
+  const onCouponFocus = async () => {
+    const token = await getData(async_keys.auth_token);
+
+    if (token) return true;
+
+    await removeItem(async_keys.skip_login_screen);
+    navigation.navigate('Logout', {
+      screen: 'LoginScreen',
+      params: {back: true},
+    });
+  };
+
+  const handleCoupon = async () => {
+    try {
+      const token = await getData(async_keys.auth_token);
+      if (token && couponCode.trim() !== '') {
+        //CALLING API
+        setLoader(true);
+        const res = await makeRequest(`apply_coupon`, {code: couponCode}, true);
+        setLoader(false);
+        if (res) {
+          const {Status, Message} = res;
+
+          if (Status === true) {
+            const {Data} = res;
+            const data = Data[0];
+
+            let total_price = Number(cartData?.totals?.total_price);
+
+            // Calculate the discounted price
+            const discountAmount = data?.amount;
+            const total_discount = (total_price * Number(discountAmount)) / 100;
+            total_price = total_price - total_discount;
+
+            const dataToSave = {
+              ...cartData,
+              totals: {
+                ...cartData.totals,
+                total_price,
+                total_discount,
+              },
+            };
+
+            dispatch(fetchCartDataSuccess(dataToSave));
+          } else {
+            showSnack(Message, null, true);
+          }
+        }
+      } else if (!token) {
+        await removeItem(async_keys.skip_login_screen);
+        navigation.navigate('Logout', {
+          screen: 'LoginScreen',
+          params: {back: true},
+        });
+      } else {
+        alert('Please enter promo code');
+      }
+    } catch (error) {
+      setLoader(false);
+      console.log('f handleCoupon', error);
+    }
+  };
 
   const handleCheckout = async () => {
     const token = await getData(async_keys.auth_token);
     if (token) {
-      navigation.navigate('CheckOutScreen');
+      navigation.navigate('CheckOutScreen', {
+        couponCode,
+        total_price: cartData?.totals?.total_price,
+      });
     } else {
       await removeItem(async_keys.skip_login_screen);
       navigation.navigate('Logout', {
@@ -72,6 +159,7 @@ const CartMighzal = ({navigation}) => {
   };
 
   const handleRemove = async item => {
+    setCouponCode('');
     try {
       setLoader(true);
       const index = cartData?.items.findIndex(
@@ -87,7 +175,9 @@ const CartMighzal = ({navigation}) => {
           totals: {
             ...cartData.totals,
             total_price:
-              Number(cartData?.totals?.total_price) - Number(item?.total),
+              Number(cartData?.totals?.total_price) > Number(item?.total)
+                ? Number(cartData?.totals?.total_price) - Number(item?.total)
+                : 0,
           },
           items_count:
             Number(cartData?.items_count) - cartData?.items[index]?.quantity,
@@ -124,6 +214,7 @@ const CartMighzal = ({navigation}) => {
   };
 
   const handleQuantity = async quantity => {
+    setCouponCode('');
     try {
       //LOADER
       setLoader(true);
@@ -313,7 +404,9 @@ const CartMighzal = ({navigation}) => {
                   </View>
                 </RectButton>
               </View>
-              <Text style={{marginBottom: hp(2)}}>{item?.total || 0} KWD</Text>
+              <Text style={{marginBottom: hp(2)}}>
+                {Number(item?.total)?.toFixed(2) || 0} KWD
+              </Text>
               {/* <WebView
                 source={{html: item?.price_html}}
                 style={{}}
@@ -330,35 +423,42 @@ const CartMighzal = ({navigation}) => {
     [cartData],
   );
 
-  const flatListHeaderComponent = () => (
-    <View style={{marginBottom: hp(2)}}>
-      <TextInput
-        placeholder="Enter Promo code"
-        placeholderTextColor="rgba(0,0,0,0.5)"
-        keyboardType="numeric"
-        maxLength={10}
-        style={styles.promoCodeInput}
-      />
+  // const FlatListHeaderComponent = useMemo(
+  //   () =>
+  //     memo(() => (
+  //       <View style={{marginBottom: hp(2)}}>
+  //         <TextInput
+  //           placeholder="Enter Promo code"
+  //           placeholderTextColor="rgba(0,0,0,0.5)"
+  //           style={styles.promoCodeInput}
+  //           onChangeText={saveCoupon}
+  //           value={couponCode}
+  //           onFocus={onCouponFocus}
+  //         />
 
-      <TouchableOpacity
-        style={{
-          backgroundColor: '#d68088',
-          marginVertical: hp(2),
-          alignSelf: 'flex-end',
-          paddingVertical: hp(1.3),
-          paddingHorizontal: wp(3.5),
-          borderRadius: wp(2),
-          elevation: 8,
-          position: 'absolute',
-          right: 20,
-          top: -10,
-        }}>
-        <Text style={{color: '#ffffff', fontFamily: 'Roboto-Medium'}}>
-          Apply
-        </Text>
-      </TouchableOpacity>
-    </View>
-  );
+  //         <TouchableOpacity
+  //           disabled={!couponCode}
+  //           onPress={handleCoupon}
+  //           style={{
+  //             backgroundColor: couponCode ? '#d68088' : '#bbb',
+  //             marginVertical: hp(2),
+  //             alignSelf: 'flex-end',
+  //             paddingVertical: hp(1.3),
+  //             paddingHorizontal: wp(3.5),
+  //             borderRadius: wp(2),
+  //             elevation: couponCode ? 5 : 0,
+  //             position: 'absolute',
+  //             right: 20,
+  //             top: -10,
+  //           }}>
+  //           <Text style={{color: '#ffffff', fontFamily: 'Roboto-Medium'}}>
+  //             Apply
+  //           </Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     )),
+  //   [],
+  // );
 
   return (
     <View style={styles.container}>
@@ -423,12 +523,45 @@ const CartMighzal = ({navigation}) => {
         <CartShimmer />
       ) : (
         <>
-          <FlatList
-            data={cartData?.items || []}
-            renderItem={({item}) => <CartList item={item} />}
-            ListHeaderComponent={flatListHeaderComponent}
-            keyExtractor={item => item?.product_id?.toString()}
-          />
+          <ScrollView>
+            <View style={{marginBottom: hp(2)}}>
+              <TextInput
+                placeholder="Enter Promo code"
+                placeholderTextColor="rgba(0,0,0,0.5)"
+                style={styles.promoCodeInput}
+                onChangeText={text => setCouponCode(text)}
+                value={couponCode}
+                onFocus={onCouponFocus}
+              />
+
+              <TouchableOpacity
+                disabled={!couponCode}
+                onPress={handleCoupon}
+                style={{
+                  backgroundColor: couponCode ? '#d68088' : '#bbb',
+                  alignSelf: 'flex-end',
+                  paddingVertical: hp(1),
+                  paddingHorizontal: wp(3.5),
+                  borderRadius: wp(2),
+                  elevation: couponCode ? 5 : 0,
+                  position: 'absolute',
+                  right: wp(4),
+                  bottom: 5,
+                }}>
+                <Text style={{color: '#ffffff', fontFamily: 'Roboto-Medium'}}>
+                  Apply
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              scrollEnabled={false}
+              data={cartData?.items || []}
+              renderItem={({item}) => <CartList item={item} />}
+              // ListHeaderComponent={() => <FlatListHeaderComponent />}
+              keyExtractor={item => item?.product_id?.toString()}
+            />
+          </ScrollView>
 
           <View>
             <Text
@@ -449,15 +582,17 @@ const CartMighzal = ({navigation}) => {
                 marginVertical: hp(2),
               }}>
               <TouchableOpacity
+                disabled={cartData?.items?.length < 1}
                 onPress={handleCheckout}
                 style={{
-                  backgroundColor: '#d68088',
+                  backgroundColor:
+                    cartData?.items?.length < 1 ? '#bbb' : '#d68088',
                   //   marginVertical: hp(2),
                   alignSelf: 'flex-start',
                   paddingVertical: hp(1.3),
                   paddingHorizontal: wp(3.5),
                   borderRadius: wp(2),
-                  elevation: 8,
+                  elevation: cartData?.items?.length < 1 ? 0 : 5,
                   marginHorizontal: wp(4),
                 }}>
                 <Text style={{color: '#ffffff', fontFamily: 'Roboto-Medium'}}>
@@ -472,7 +607,9 @@ const CartMighzal = ({navigation}) => {
                   marginLeft: wp(4),
                 }}>
                 <View>
-                  <Text style={{fontFamily: 'Roboto-Light'}}>Discount</Text>
+                  <Text style={{fontFamily: 'Roboto-Light', color: '#888'}}>
+                    Discount
+                  </Text>
                   <Text style={{fontFamily: 'Roboto-Medium', color: 'black'}}>
                     Total
                   </Text>
@@ -481,7 +618,9 @@ const CartMighzal = ({navigation}) => {
                   <Text
                     style={{
                       fontFamily: 'Roboto-Light',
-                      alignSelf: 'flex-start',
+                      alignSelf: 'flex-end',
+                      color: '#888',
+                      // textDecorationLine: 'line-through',
                     }}>
                     {cartData?.totals?.total_discount || 0} KWD
                   </Text>

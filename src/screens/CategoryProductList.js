@@ -39,6 +39,8 @@ const CategoryProductList = ({navigation, route}) => {
     }
   }, []);
 
+  const handleSearch = () => navigation.navigate('SearchScreen-Category');
+
   // const fetchProducts = async id => {
   //   try {
   //     const found = allProducts.filter(item => item.category_id === id);
@@ -55,6 +57,7 @@ const CategoryProductList = ({navigation, route}) => {
         title={categoryDetails?.category_name}
         titleStyle={{color: '#d68088'}}
         search
+        handleSearch={handleSearch}
       />
 
       {isLoading ? (

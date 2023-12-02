@@ -77,9 +77,7 @@ const SignUp = ({navigation}) => {
         setLoader(false);
         const {Status, Message} = result;
         if (Status === true) {
-          setSnackText(Message);
-          setVisible(true);
-          setError(false);
+          showSnack(Message);
           setInputs({
             fullName: '',
             email: '',
@@ -88,9 +86,7 @@ const SignUp = ({navigation}) => {
 
           navigation.navigate('LoginScreen');
         } else {
-          setSnackText(Message);
-          setVisible(true);
-          setError(true);
+          showSnack(Message, null, true);
         }
       }
     } catch (error) {
@@ -137,8 +133,12 @@ const SignUp = ({navigation}) => {
 
         <Text style={styles.nameText}>Email</Text>
         <View style={[styles.emailTextInputBox, {marginTop: hp(2)}]}>
-          <Image source={ic_email1} style={{height: hp(3), width: wp(6)}} />
+          <Image
+            source={ic_email1}
+            style={{width: wp(6), aspectRatio: 1 / 1}}
+          />
           <TextInput
+            inputMode="email"
             placeholder="Enter Email "
             placeholderTextColor={'#7a7a7a'}
             style={styles.emailTextInput}
@@ -174,7 +174,7 @@ const SignUp = ({navigation}) => {
         />
 
         <Text
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate('LoginScreen')}
           style={styles.alreadyRegisterText}>
           Already register? Login
         </Text>

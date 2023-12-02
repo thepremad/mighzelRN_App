@@ -1917,6 +1917,11 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
+"@tap-payments/gosell-sdk-react-native@1.0.42":
+  version "1.0.42"
+  resolved "https://registry.yarnpkg.com/@tap-payments/gosell-sdk-react-native/-/gosell-sdk-react-native-1.0.42.tgz#5cd38c21dc92adc874404da2e7fe2df6e9ea51b9"
+  integrity sha512-RZtbnUMFF3itfLPq/fR20kgnpW3WlK6D9o7MtWj0pJvef1hV2q4d0tooYt9UZr/Rj7n3/KCv6hi1jFfI2Cv9bA==
+
 "@tsconfig/react-native@^2.0.2":
   version "2.0.3"
   resolved "https://registry.npmjs.org/@tsconfig/react-native/-/react-native-2.0.3.tgz"

@@ -61,10 +61,10 @@ const ProfileScreen = ({navigation}) => {
     // setLoader(false);
   };
 
-  const handleLogin = async () => {
+  const handleLogin = async screen => {
     await removeItem(async_keys.skip_login_screen);
     navigation.navigate('Logout', {
-      screen: 'LoginScreen',
+      screen,
       params: {back: true},
     });
   };
@@ -79,9 +79,9 @@ const ProfileScreen = ({navigation}) => {
       <View
         style={{
           position: 'absolute',
-          top: 40,
           height: hp(100),
           width: wp(100),
+          justifyContent: 'center',
           zIndex: 9,
         }}>
         <ActivityIndicator color="#d68088" size={'large'} />
@@ -91,11 +91,15 @@ const ProfileScreen = ({navigation}) => {
 
   return !isLogin ? (
     <>
-      <RectButton onPress={handleLogin} style={styles.loginButtonBox}>
+      <RectButton
+        onPress={() => handleLogin('LoginScreen')}
+        style={styles.loginButtonBox}>
         <Text style={styles.loginButtonText}>Login</Text>
       </RectButton>
 
-      <RectButton style={[styles.loginButtonBox, {marginTop: hp(4)}]}>
+      <RectButton
+        onPress={() => handleLogin('SignUpScreen')}
+        style={[styles.loginButtonBox, {marginTop: hp(4)}]}>
         <Text style={styles.loginButtonText}>Register</Text>
       </RectButton>
     </>

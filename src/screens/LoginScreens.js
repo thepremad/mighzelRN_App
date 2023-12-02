@@ -1,3 +1,5 @@
+/* eslint-disable react/self-closing-comp */
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable no-catch-shadow */
 /* eslint-disable no-shadow */
 /* eslint-disable react-native/no-inline-styles */
@@ -6,7 +8,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
@@ -16,21 +17,18 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import Fontisto from 'react-native-vector-icons/Fontisto';
-
 // image
-import ic_email from '../assets/icons/ic_email.png';
-import ic_password from '../assets/icons/ic_password.png';
-import {RectButton} from 'react-native-gesture-handler';
 import {async_keys, getData, storeData} from '../storage/UserPreference';
-import {CommonActions} from '@react-navigation/native';
 import {isValidEmail} from '../authentication/auth';
-import CustomSnack from '../components/CustomSnack';
-import {ActivityIndicator, Icon, TextInput} from 'react-native-paper';
+import {ActivityIndicator, Button, Icon, TextInput} from 'react-native-paper';
 import {BASE_URL, makeRequest} from '../api/ApiInfo';
 import {showSnack} from '../components/Snackbar';
 import {useDispatch} from 'react-redux';
 import {setMainRoute} from '../redux/action/routeActions';
+import PaymentUI from '../payment_gateway/PaymentUI';
+
+// import RNGoSell from '@tap-payments/gosell-sdk-react-native';
+// import sdkConfigurations from '../payment_gateway/sdkConfigurations';
 
 const LoginScreens = ({navigation, route}) => {
   // console.log('route', route);
@@ -48,14 +46,74 @@ const LoginScreens = ({navigation, route}) => {
   };
 
   const handleSkip = async () => {
+    // RNGoSell.goSellSDK.startPayment(sdkConfigurations, 0, handleResult);
     await storeData(async_keys.skip_login_screen, true);
 
-    if (!route?.params?.back) {
+    if (route?.params?.back) {
       navigation.goBack();
     } else {
       dispatch(setMainRoute('Login'));
     }
   };
+
+  // const handleResult = (error, status) => {
+  //   var myString = JSON.stringify(status);
+  //   console.log('status is ' + status.sdk_result);
+  //   console.log(myString);
+  //   var resultStr = String(status.sdk_result);
+  //   switch (resultStr) {
+  //     case 'SUCCESS':
+  //       handleSDKResult(status);
+  //       break;
+  //     case 'FAILED':
+  //       handleSDKResult(status);
+  //       break;
+  //     case 'SDK_ERROR':
+  //       console.log('sdk error............');
+  //       console.log(status['sdk_error_code']);
+  //       console.log(status['sdk_error_message']);
+  //       console.log(status['sdk_error_description']);
+  //       console.log('sdk error............');
+  //       break;
+  //     case 'NOT_IMPLEMENTED':
+  //       break;
+  //   }
+  // };
+
+  // const handleSDKResult = result => {
+  //   console.log('trx_mode::::');
+  //   console.log(result['trx_mode']);
+  //   switch (result['trx_mode']) {
+  //     case 'CHARGE':
+  //       console.log('Charge');
+  //       console.log(result);
+  //       printSDKResult(result);
+  //       break;
+
+  //     case 'AUTHORIZE':
+  //       printSDKResult(result);
+  //       break;
+
+  //     case 'SAVE_CARD':
+  //       printSDKResult(result);
+  //       break;
+
+  //     case 'TOKENIZE':
+  //       Object.keys(result).map(key => {
+  //         console.log(`TOKENIZE \t${key}:\t\t\t${result[key]}`);
+  //       });
+
+  //       // responseID = tapSDKResult['token'];
+  //       break;
+  //   }
+  // };
+
+  // const printSDKResult = result => {
+  //   if (!result) return;
+  //   Object.keys(result).map(key => {
+  //     console.log(`${result['trx_mode']}\t${key}:\t\t\t${result[key]}`);
+  //   });
+  // };
 
   const addingInCart = async token => {
     let isSuccess;
@@ -162,13 +220,16 @@ const LoginScreens = ({navigation, route}) => {
             position: 'absolute',
             height: hp(100),
             width: wp(100),
-            zIndex: 9,
+            zIndex: 99,
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,.5)',
           }}>
           <ActivityIndicator color="#d68088" size={'large'} />
         </View>
       )}
 
       <Text
+        disabled={route?.params?.back}
         onPress={handleSkip}
         style={{fontSize: wp(4), color: '#555', margin: wp(3)}}>
         {route?.params?.back ? '' : 'Skip'}
@@ -178,6 +239,7 @@ const LoginScreens = ({navigation, route}) => {
         <Text style={styles.loginText}>Login</Text>
 
         <TextInput
+          inputMode="email"
           mode="flat"
           label=""
           placeholder="Enter Email"
@@ -222,18 +284,42 @@ const LoginScreens = ({navigation, route}) => {
           value={inputs.password}
         />
 
-        <TouchableOpacity
+        <Button
+          mode="text"
+          textColor="#fff"
+          labelStyle={styles.forgetPasswordText}
+          // style={styles.loginButtonBox}
           style={{
             alignSelf: 'flex-end',
             marginVertical: hp(1),
-            marginRight: wp(2),
-          }}>
-          <Text style={styles.forgetPasswordText}>Forgot Password</Text>
-        </TouchableOpacity>
+          }}
+          onPress={() => navigation.navigate('ForgotPassword')}>
+          Forgot Password
+        </Button>
 
-        <RectButton onPress={handleLogin} style={styles.loginButtonBox}>
+        {/* <RectButton onPress={handleLogin} style={styles.loginButtonBox}>
           <Text style={styles.loginButtonText}>Login</Text>
-        </RectButton>
+        </RectButton> */}
+
+        <Button
+          mode="text"
+          buttonColor="#d68088"
+          textColor="#fff"
+          labelStyle={{
+            fontSize: wp(4),
+            fontFamily: 'Roboto-Bold',
+          }}
+          style={styles.loginButtonBox}
+          contentStyle={{
+            height: hp(6),
+          }}
+          // icon={() =>
+          //   !loader && <ActivityIndicator size="small" color="#fff" />
+          // }
+          // loading={true}
+          onPress={handleLogin}>
+          Login
+        </Button>
 
         <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
           <Text style={styles.registerHereText}>Register here</Text>
@@ -270,18 +356,10 @@ const styles = StyleSheet.create({
 
   loginButtonBox: {
     backgroundColor: '#cf8385',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginHorizontal: wp(8),
     marginTop: hp(5),
     elevation: 5,
-  },
-
-  loginButtonText: {
-    fontSize: wp(4),
-    color: '#fff',
-    paddingVertical: hp(1.5),
-    fontFamily: 'Roboto-Medium',
+    borderRadius: 0,
   },
 
   registerHereText: {
