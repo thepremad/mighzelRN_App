@@ -14,7 +14,7 @@ const ProductDetailShimmer = () => {
       <Header
         navAction="back"
         title=""
-        titleStyle={{fontSize: wp(4.8), fontFamily: 'Roboto-Light'}}
+        titleStyle={{fontSize: wp(4.8), fontFamily: 'Montserrat-Light'}}
       />
       <SkeletonPlaceholder>
         <SkeletonPlaceholder.Item height={hp(42)} width={wp(100)} />

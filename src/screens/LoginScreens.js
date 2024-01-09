@@ -307,7 +307,7 @@ const LoginScreens = ({navigation, route}) => {
           textColor="#fff"
           labelStyle={{
             fontSize: wp(4),
-            fontFamily: 'Roboto-Bold',
+            fontFamily: 'Montserrat-SemiBold',
           }}
           style={styles.loginButtonBox}
           contentStyle={{
@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
     fontSize: wp(6),
     color: '#000',
     alignSelf: 'center',
-    fontFamily: 'Roboto-Bold',
+    fontFamily: 'Montserrat-SemiBold',
     marginVertical: hp(5),
     marginBottom: hp(10),
   },
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
   forgetPasswordText: {
     fontSize: wp(4),
     color: '#3a3a3a',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
   },
 
   loginButtonBox: {

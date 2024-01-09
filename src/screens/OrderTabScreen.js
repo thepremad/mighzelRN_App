@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   tabBarLabel: {
-    fontFamily: 'Roboto-Bold',
+    fontFamily: 'Montserrat-SemiBold',
     fontSize: wp(3),
     color: '#000',
   },
@@ -158,12 +158,12 @@ const styles = StyleSheet.create({
   activeTabTextColor: {
     fontSize: wp(4),
     color: '#000',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
   },
   tabTextColor: {
     fontSize: wp(4),
     color: '#999',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
   },
   internalTabStyle: {
     width: wp(33.29),

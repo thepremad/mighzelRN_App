@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
   registerText: {
     fontSize: wp(7),
     color: '#000',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
     alignSelf: 'center',
     marginTop: hp(10),
   },
@@ -207,7 +207,7 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: wp(5),
     color: '#000',
-    fontFamily: 'Roboto-Regular',
+    fontFamily: 'Montserrat-Regular',
     marginTop: hp(2),
     marginLeft: wp(2),
   },
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   alreadyRegisterText: {
     fontSize: wp(4),
     color: '#000',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
     textAlign: 'right',
     marginRight: wp(4),
     marginTop: hp(1.5),
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#fff',
     paddingVertical: hp(2),
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
   },
 
   lastBox: {

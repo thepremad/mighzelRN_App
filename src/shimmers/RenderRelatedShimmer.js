@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: wp(3.8),
     color: '#000',
-    fontFamily: 'Roboto-Light',
+    fontFamily: 'Montserrat-Light',
     textTransform: 'capitalize',
     marginRight: wp(1.9),
   },

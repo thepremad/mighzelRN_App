@@ -28,7 +28,7 @@ const cartReducer = (state = initialHomeState, action) => {
       return {
         ...state,
         isLoading: true,
-        shimmer: true,
+        shimmer: state.cartData.items.length === 0,
         error: null,
       };
     case FETCH_CART_DATA_SUCCESS:

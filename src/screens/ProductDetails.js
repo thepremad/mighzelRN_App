@@ -50,7 +50,9 @@ const ProductDetails = ({navigation, route}) => {
   useEffect(() => {
     const params = route.params;
     if (params) {
-      fetchProductDetails(params.product_id);
+      if (params.product_id) {
+        fetchProductDetails(params.product_id);
+      }
     }
   }, []);
 
@@ -62,6 +64,7 @@ const ProductDetails = ({navigation, route}) => {
       );
       if (result) {
         const {Status} = result;
+
         if (Status === true) {
           const {Data} = result;
           setData(Data);
@@ -157,7 +160,7 @@ const ProductDetails = ({navigation, route}) => {
 
         if (token) {
           const params = {
-            product_id: data?.product_id,
+            product_id: attribute || data?.product_id,
             token,
             quantity: 1,
           };
@@ -167,6 +170,7 @@ const ProductDetails = ({navigation, route}) => {
             if (Status === true) {
               const {Data} = res;
               dispatch(fetchCartDataSuccess(Data));
+              showSnack('Product added to cart');
             } else {
               showSnack(Message, null, true);
             }
@@ -175,6 +179,7 @@ const ProductDetails = ({navigation, route}) => {
           await storeData(async_keys.cart_data, {...cartData, ...update}).then(
             () => {
               dispatch(fetchCartDataSuccess(update));
+              showSnack('Product added to cart');
             },
           );
         }
@@ -185,7 +190,9 @@ const ProductDetails = ({navigation, route}) => {
     }
   };
 
-  // console.log('setData', data);
+  const handleRelatedProd = prod_id => fetchProductDetails(prod_id);
+
+  console.log('setData', attribute);
 
   return loader ? (
     <ProductDetailShimmer />
@@ -194,7 +201,7 @@ const ProductDetails = ({navigation, route}) => {
       <Header
         navAction="back"
         title={data?.product_name || ''}
-        titleStyle={{fontSize: wp(4.8), fontFamily: 'Roboto-Light'}}
+        titleStyle={{fontSize: wp(4.8), fontFamily: 'Montserrat-Regular'}}
       />
 
       {addToCartLoader && (
@@ -273,6 +280,7 @@ const ProductDetails = ({navigation, route}) => {
                   renderItem={({item, index}) => (
                     <Button
                       mode="outlined"
+                      // textColor={item?.value?.toLowerCase() || '#000'}
                       textColor="#000"
                       rippleColor="#d68088"
                       onPress={() => {
@@ -286,9 +294,11 @@ const ProductDetails = ({navigation, route}) => {
                           }),
                           {id: mainItem?.id, index},
                         ]);
-                        if (index === 0) {
-                          setAttribute(item?.product_id);
-                        }
+
+                        setAttribute(item?.product_id);
+                      }}
+                      labelStyle={{
+                        fontFamily: 'Montserrat-SemiBold',
                       }}
                       style={[
                         styles.selectionBox,
@@ -347,7 +357,12 @@ const ProductDetails = ({navigation, route}) => {
               scrollEnabled={false}
               data={relatedData}
               keyExtractor={item => item?.product_id?.toString()}
-              renderItem={({item}) => <RenderProducts item={item} />}
+              renderItem={({item}) => (
+                <RenderProducts
+                  handleRelatedProd={handleRelatedProd}
+                  item={item}
+                />
+              )}
               ListHeaderComponent={() => (
                 <Text
                   style={{
@@ -392,14 +407,14 @@ const styles = StyleSheet.create({
   productNameText: {
     color: '#000',
     fontSize: wp(4.3),
-    fontFamily: 'Roboto-Regular',
+    fontFamily: 'Montserrat-Medium',
     marginHorizontal: wp(2),
     textTransform: 'capitalize',
   },
   selectionTitle: {
     color: '#000',
     fontSize: wp(3.8),
-    fontFamily: 'Roboto-Regular',
+    fontFamily: 'Montserrat-Medium',
     marginHorizontal: wp(2),
     marginVertical: hp(1.6),
   },
@@ -421,7 +436,8 @@ const styles = StyleSheet.create({
   addText: {
     color: '#fff',
     fontSize: wp(4.2),
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-SemiBold',
+    textTransform: 'uppercase',
   },
   productDetailsText: {
     textTransform: 'capitalize',

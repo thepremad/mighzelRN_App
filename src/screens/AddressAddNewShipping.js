@@ -15,21 +15,33 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import {ActivityIndicator, TextInput} from 'react-native-paper';
+import {ActivityIndicator, RadioButton, TextInput} from 'react-native-paper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import Header from '../components/Header';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import {makeRequest} from '../api/ApiInfo';
 import {showSnack} from '../components/Snackbar';
 import {async_keys, getData} from '../storage/UserPreference';
+import {
+  fetchCartDataRequest,
+  fetchCartDataSuccess,
+} from '../redux/action/cartActions';
+import CustomDD from '../components/CustomDD';
 
 // image
 // import ima_leftArrow from '../asserts/Image/ima_leftArrow.png';
 // import ic_rightArrow from '../asserts/Image/ic_rightArrow.png';
 const AddressAddNewShipping = ({navigation, route}) => {
-  console.log(route);
   const [loader, setLoader] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState(1);
+  const [openDropdown, setOpenDropdown] = useState(null);
+  const [country, setCountry] = useState([]);
+  const [stateList, setStateList] = useState([]);
+
+  const [SelectedCountry, setSelectedCountry] = useState({});
+  const [SelectedState, setSelectedState] = useState({});
+
   const [inputs, setInputs] = useState({
     first_name: '',
     last_name: '',
@@ -43,35 +55,135 @@ const AddressAddNewShipping = ({navigation, route}) => {
     email: '',
     phone: '',
   });
+  const dispatch = useDispatch();
 
   const {cartData, isLoading, error} = useSelector(state => state.cart);
 
+  // console.log('info', {SelectedCountry, stateList});
+
   useEffect(() => {
-    // console.log(cartData?.billing_address);
-    setInputs({
-      ...inputs,
-      ...cartData?.billing_address,
-    });
-  }, [isLoading]);
+    const params = route.params;
+    if (params) {
+      if (params.type) {
+        setSelectedAddress(params.type || 1);
+      }
+    }
+
+    if (
+      Object.keys(cartData?.shipping_address).length === 0 ||
+      Object.keys(cartData?.billing_address).length === 0
+    ) {
+      dispatch(fetchCartDataRequest());
+    }
+
+    fetchCountry();
+  }, []);
+
+  useEffect(() => {
+    const address =
+      selectedAddress === 1
+        ? cartData?.shipping_address
+        : cartData?.billing_address;
+
+    let obj = {};
+
+    for (let key in address) {
+      obj = {...obj, [key]: address[key] || ''};
+    }
+
+    setInputs(obj);
+  }, [isLoading, selectedAddress]);
+
+  useEffect(() => {
+    if (Object.keys(SelectedCountry).length !== 0) {
+      fetchState();
+    }
+  }, [SelectedCountry]);
+
+  const fetchCountry = () => {
+    setLoader(true);
+
+    makeRequest(`countaries`)
+      .then(result => {
+        if (result) {
+          const {Status} = result;
+          if (Status === true) {
+            const {Data} = result;
+            setCountry(Data);
+          }
+        }
+        setLoader(false);
+      })
+      .catch(e => {
+        setLoader(false);
+        console.log(e);
+      });
+  };
+
+  const fetchState = () => {
+    makeRequest(`get_state?country_code=${SelectedCountry?.code}`)
+      .then(result => {
+        if (result) {
+          const {Status} = result;
+          if (Status === true) {
+            const {Data} = result;
+            setStateList(Data);
+          } else {
+            setStateList([]);
+          }
+        }
+        setLoader(false);
+      })
+      .catch(e => {
+        setLoader(false);
+        console.log(e);
+      });
+  };
 
   const handleInputs = (value, key) => {
     setInputs({...inputs, [key]: value});
   };
 
+  const handleSelect = item => {
+    if (openDropdown === 'country') {
+      setSelectedCountry(item);
+      setInputs({...inputs, country: item.name});
+    } else {
+      setSelectedState(item);
+      setInputs({...inputs, state: item.name});
+    }
+
+    setOpenDropdown(null);
+  };
+
   const handleSave = async () => {
     try {
+      const addType =
+        selectedAddress === 1 ? 'shipping_address' : 'billing_address';
+
+      const update = {
+        ...cartData,
+        [addType]: inputs,
+      };
+
       const customer_id = await getData(async_keys.customer_id);
       setLoader(true);
       const res = await makeRequest(
         `update_shipping_address`,
-        {...inputs, customer_id},
+        {
+          ...inputs,
+          customer_id,
+          type: selectedAddress === 1 ? 'shipping' : 'billing',
+        },
         true,
       );
       if (res) {
         const {Status, Message} = res;
         if (Status === true) {
+          console.log('res', res);
           showSnack(Message);
           if (route.name === 'AddShippingAddressScreen-Cart') {
+            dispatch(fetchCartDataSuccess(update));
             navigation.goBack();
           }
         } else {
@@ -105,13 +217,56 @@ const AddressAddNewShipping = ({navigation, route}) => {
       )}
       <Header
         navAction="back"
-        title="Add New Billing Address"
-        titleStyle={{fontSize: wp(4.8), fontFamily: 'Roboto-Regular'}}
+        title={`Add / Edit ${
+          selectedAddress === 1 ? 'Shipping' : 'Billing'
+        } Address`}
+        titleStyle={{fontSize: wp(4.8), fontFamily: 'Montserrat-Regular'}}
         style={{marginBottom: hp(3)}}
       />
 
       <ScrollView contentContainerStyle={{paddingBottom: hp(3)}}>
         <View style={styles.homeContainer}>
+          <View
+            style={{
+              marginBottom: hp(2),
+              flexDirection: 'row',
+              justifyContent: 'space-around',
+              alignItems: 'center',
+              marginHorizontal: wp(4),
+            }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                flex: 1,
+              }}>
+              <RadioButton
+                uncheckedColor="#999"
+                color="#d68088"
+                value={selectedAddress}
+                status={selectedAddress === 1 ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedAddress(1)}
+              />
+              <Text>Shipping</Text>
+            </View>
+
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                flex: 1,
+              }}>
+              <RadioButton
+                uncheckedColor="#999"
+                color="#d68088"
+                value={selectedAddress}
+                status={selectedAddress === 2 ? 'checked' : 'unchecked'}
+                onPress={() => setSelectedAddress(2)}
+              />
+              <Text>Billing</Text>
+            </View>
+          </View>
+
           <TextInput
             mode="flat"
             label="First Name"
@@ -150,7 +305,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
             }}
             underlineColor="#bbb"
             activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'last_name')}
+            onChangeText={text => handleInputs(text, 'email')}
             value={inputs.email}
           />
 
@@ -210,7 +365,9 @@ const AddressAddNewShipping = ({navigation, route}) => {
             value={inputs.postcode}
           />
 
-          <TouchableOpacity style={styles.selecCityBox}>
+          <TouchableOpacity
+            onPress={() => setOpenDropdown('country')}
+            style={styles.selecCityBox}>
             <Text
               style={{
                 fontSize: wp(4),
@@ -219,22 +376,53 @@ const AddressAddNewShipping = ({navigation, route}) => {
               }}>
               {inputs.country || 'Select Country'}
             </Text>
-            <AntDesign name="right" color="#000" size={wp(5)} />
-          </TouchableOpacity>
-          <View style={[styles.lineBox, {marginTop: hp(2)}]} />
+            <AntDesign name="down" color="#4F4848" size={wp(5)} />
 
-          <TouchableOpacity style={styles.selecCityBox}>
+            {openDropdown === 'country' && (
+              <CustomDD
+                data={country}
+                openDropdown={openDropdown === 'country'}
+                setOpenDropdown={setOpenDropdown}
+                handleSelect={handleSelect}
+              />
+            )}
+          </TouchableOpacity>
+          <View style={[styles.lineBox]} />
+
+          <TouchableOpacity
+            // disabled={Object.keys(SelectedCountry).length === 0}
+            onPress={() => setOpenDropdown('state')}
+            style={[styles.selecCityBox]}>
             <Text
               style={{
                 fontSize: wp(4),
                 color: '#4F4848',
+                // Object.keys(SelectedCountry).length === 0
+                //   ? '#ddd'
+                //   : '#4F4848',
                 textTransform: 'capitalize',
               }}>
               {inputs.state || 'Select State/Province/Region'}
             </Text>
-            <AntDesign name="right" color="#000" size={wp(5)} />
+            <AntDesign
+              name="down"
+              color={
+                '#4F4848'
+                // Object.keys(SelectedCountry).length === 0 ? '#ddd' : '#4F4848'
+              }
+              size={wp(5)}
+            />
+
+            {openDropdown === 'state' && (
+              <CustomDD
+                data={stateList}
+                openDropdown={openDropdown === 'state'}
+                setOpenDropdown={setOpenDropdown}
+                handleSelect={handleSelect}
+              />
+            )}
           </TouchableOpacity>
-          <View style={[styles.lineBox, {marginTop: hp(2)}]} />
+          <View style={[styles.lineBox]} />
 
           <TextInput
             mode="flat"
@@ -280,7 +468,7 @@ const styles = StyleSheet.create({
 
   InformationText: {
     color: '#000',
-    fontFamily: 'Roboto-Regular',
+    fontFamily: 'Montserrat-Regular',
     marginLeft: wp(4),
   },
   righArrowImage: {
@@ -297,7 +485,7 @@ const styles = StyleSheet.create({
   firstNameTextInput: {
     fontSize: wp(4),
     color: '#000',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
     marginLeft: wp(4),
     marginTop: hp(-1),
   },
@@ -321,7 +509,7 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#fff',
     paddingVertical: hp(2),
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
   },
 
   rightArrowImage: {
@@ -332,7 +520,7 @@ const styles = StyleSheet.create({
   selecCityBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: wp(4),
-    marginTop: hp(2),
+    marginHorizontal: wp(5.5),
+    paddingVertical: hp(2),
   },
 });

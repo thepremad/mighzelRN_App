@@ -17,8 +17,8 @@ const userReducer = (state = initialHomeState, action) => {
       console.log(FETCH_USER_DATA_REQUEST);
       return {
         ...state,
-        isLoading: state.userData.length === 0,
-        shimmer: true,
+        isLoading: true,
+        shimmer: state.userData.length === 0,
         error: null,
       };
     case FETCH_USER_DATA_SUCCESS:

@@ -71,7 +71,7 @@ const CancelledScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Medium',
+              fontFamily: 'Montserrat-Medium',
               color: '#838383',
               marginLeft: 'auto',
             }}>
@@ -81,7 +81,7 @@ const CancelledScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Bold',
+              fontFamily: 'Montserrat-SemiBold',
               color: '#000',
             }}>
             {item.order_id}
@@ -92,14 +92,14 @@ const CancelledScreen = ({navigation}) => {
             <Text
               style={{
                 fontSize: wp(3.9),
-                fontFamily: 'Roboto-Bold',
+                fontFamily: 'Montserrat-SemiBold',
                 color: '#000',
               }}>
               Quantity:{' '}
               <Text
                 style={{
                   fontSize: wp(3.9),
-                  fontFamily: 'Roboto-Bold',
+                  fontFamily: 'Montserrat-SemiBold',
                   color: '#999',
                 }}>
                 {item.quantity}
@@ -109,15 +109,15 @@ const CancelledScreen = ({navigation}) => {
             <Text
               style={{
                 fontSize: wp(3.9),
-                fontFamily: 'Roboto-Bold',
+                fontFamily: 'Montserrat-SemiBold',
                 color: '#999',
                 marginLeft: 'auto',
               }}>
-              Total Amount:
+              Total Amount:{' '}
               <Text
                 style={{
                   fontSize: wp(3.9),
-                  fontFamily: 'Roboto-Bold',
+                  fontFamily: 'Montserrat-SemiBold',
                   color: '#000',
                 }}>
                 {item.total} KWD
@@ -128,7 +128,7 @@ const CancelledScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Regular',
+              fontFamily: 'Montserrat-Regular',
               color: 'red',
               marginLeft: 'auto',
               textTransform: 'capitalize',
@@ -151,7 +151,7 @@ const CancelledScreen = ({navigation}) => {
             renderItem={ItemView}
             ListEmptyComponent={() => (
               <View style={{alignItems: 'center'}}>
-                <Text style={{}}>No data found !</Text>
+                <Text style={{}}>No Orders found !</Text>
               </View>
             )}
             keyExtractor={(item, index) => index.toString()}

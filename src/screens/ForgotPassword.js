@@ -99,7 +99,7 @@ const ForgotPassword = ({navigation}) => {
             style={{
               color: 'red',
               fontSize: wp(2.8),
-              fontFamily: 'Roboto-Medium',
+              fontFamily: 'Montserrat-Medium',
               marginTop: 5,
             }}>
             Please enter valid email!
@@ -114,7 +114,7 @@ const ForgotPassword = ({navigation}) => {
           textColor="#fff"
           labelStyle={{
             fontSize: wp(4),
-            fontFamily: 'Roboto-Bold',
+            fontFamily: 'Montserrat-SemiBold',
           }}
           style={{
             marginVertical: hp(7),
@@ -143,13 +143,13 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: wp(5.5),
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
     textAlign: 'center',
     marginBottom: hp(2),
   },
   descText: {
     fontSize: wp(4.5),
-    fontFamily: 'Roboto-Light',
+    fontFamily: 'Montserrat-Light',
     letterSpacing: 0.6,
   },
 });

@@ -15,64 +15,6 @@ import {useSelector} from 'react-redux';
 
 const ProcessingScreen = ({navigation}) => {
   const [loader, setLoader] = useState(true);
-  const [list, setList] = useState([
-    {
-      id: 1,
-      trackingNumber: '45971',
-      date: '2023-08-11 11:27:02',
-      quantity: '1',
-      totalAmount: '11.00KWD',
-      status: 'wc-processing',
-    },
-    {
-      id: 2,
-      trackingNumber: '45972',
-      date: '2023-08-11 11:40:30',
-      quantity: '1',
-      totalAmount: '11.00KWD',
-      status: 'wc-processing',
-    },
-    {
-      id: 3,
-      trackingNumber: '45973',
-      date: '2023-08-12 11:33:01',
-      quantity: '1',
-      totalAmount: '11.00KWD',
-      status: 'wc-processing',
-    },
-    {
-      id: 4,
-      trackingNumber: '45973',
-      date: '2023-08-12 11:33:01',
-      quantity: '1',
-      totalAmount: '11.00KWD',
-      status: 'wc-processing',
-    },
-    {
-      id: 5,
-      trackingNumber: '45973',
-      date: '2023-08-12 11:33:01',
-      quantity: '1',
-      totalAmount: '11.00KWD',
-      status: 'wc-processing',
-    },
-    {
-      id: 6,
-      trackingNumber: '45973',
-      date: '2023-08-12 11:33:01',
-      quantity: '1',
-      totalAmount: '11.00KWD',
-      status: 'wc-processing',
-    },
-    {
-      id: 7,
-      trackingNumber: '66666',
-      date: '2023-08-12 11:33:01',
-      quantity: '1',
-      totalAmount: '11.00KWD',
-      status: 'wc-processing',
-    },
-  ]);
 
   const {orderData, isLoading, shimmer, error} = useSelector(
     state => state.order,
@@ -83,7 +25,7 @@ const ProcessingScreen = ({navigation}) => {
     return () => clearTimeout(timeOutID);
   }, []);
 
-  const data = orderData.filter(item => item?.status === 'processing');
+  const data = orderData.filter(item => item?.status === 'pending');
   const ItemView = ({item}) => {
     return (
       <RectButton
@@ -103,7 +45,7 @@ const ProcessingScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Medium',
+              fontFamily: 'Montserrat-Medium',
               color: '#838383',
               marginLeft: 'auto',
             }}>
@@ -113,7 +55,7 @@ const ProcessingScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Bold',
+              fontFamily: 'Montserrat-SemiBold',
               color: '#000',
             }}>
             {item?.order_number}
@@ -124,14 +66,14 @@ const ProcessingScreen = ({navigation}) => {
             <Text
               style={{
                 fontSize: wp(3.9),
-                fontFamily: 'Roboto-Bold',
+                fontFamily: 'Montserrat-SemiBold',
                 color: '#000',
               }}>
               Quantity:{' '}
               <Text
                 style={{
                   fontSize: wp(3.9),
-                  fontFamily: 'Roboto-Bold',
+                  fontFamily: 'Montserrat-SemiBold',
                   color: '#999',
                 }}>
                 {item?.quantity}
@@ -141,7 +83,7 @@ const ProcessingScreen = ({navigation}) => {
             <Text
               style={{
                 fontSize: wp(3.9),
-                fontFamily: 'Roboto-Bold',
+                fontFamily: 'Montserrat-SemiBold',
                 color: '#999',
                 marginLeft: 'auto',
               }}>
@@ -149,7 +91,7 @@ const ProcessingScreen = ({navigation}) => {
               <Text
                 style={{
                   fontSize: wp(3.9),
-                  fontFamily: 'Roboto-Bold',
+                  fontFamily: 'Montserrat-SemiBold',
                   color: '#000',
                 }}>
                 {item?.total} KWD
@@ -160,7 +102,7 @@ const ProcessingScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Regular',
+              fontFamily: 'Montserrat-Regular',
               color: 'orange',
               marginLeft: 'auto',
               textTransform: 'capitalize',
@@ -183,7 +125,7 @@ const ProcessingScreen = ({navigation}) => {
             renderItem={ItemView}
             ListEmptyComponent={() => (
               <View style={{alignItems: 'center'}}>
-                <Text style={{}}>No data found !</Text>
+                <Text style={{}}>No Orders Placed !</Text>
               </View>
             )}
             keyExtractor={(item, index) => index.toString()}

@@ -90,7 +90,7 @@ const Categories = props => {
           marginLeft: wp(5),
           fontSize: wp(4.5),
           color: '#000000',
-          fontFamily: 'Roboto-Light',
+          fontFamily: 'Montserrat-Light',
         }}>
         {item?.category_name}
       </Text>
@@ -143,8 +143,9 @@ const Categories = props => {
         style={{
           marginHorizontal: wp(3),
           marginVertical: hp(2),
-          fontSize: wp(5),
+          fontSize: wp(5.5),
           color: 'black',
+          fontFamily: 'Montserrat-SemiBold',
         }}>
         Category
       </Text>

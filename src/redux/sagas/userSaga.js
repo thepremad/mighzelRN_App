@@ -10,9 +10,12 @@ import {
 
 function* fetchUser() {
   try {
-    const token = yield call(getData, async_keys.auth_token);
-    if (token) {
-      const response = yield call(makeRequest, `user_detail?token=${token}`);
+    const customer_id = yield call(getData, async_keys.customer_id);
+    if (customer_id) {
+      const response = yield call(
+        makeRequest,
+        `customer_detail?customer_id=${customer_id}`,
+      );
       const {Status, Message} = response;
 
       if (Status === true) {

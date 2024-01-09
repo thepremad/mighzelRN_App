@@ -48,56 +48,62 @@ const {
 //   },
 // ];
 
-const customer = {
-  // Here we can set the customer object as on of the available options on this URL:
-  // See [https://github.com/Tap-Payments/gosellSDK-ReactNative#customer] to get more details of setting the customer
-  isdNumber: '965',
-  number: '00000000',
-  customerId: '',
-  first_name: 'test',
-  middle_name: 'test',
-  last_name: 'test',
-  email: 'test@test.com',
+const paymentReference = {
+  track: 'track',
+  payment: 'payment',
+  gateway: 'gateway',
+  acquirer: 'acquirer',
+  transaction: 'test_123',
+  order: 'test_123',
+  gosellID: null,
 };
-// const paymentReference = {
-//   track: 'track',
-//   payment: 'payment',
-//   gateway: 'gateway',
-//   acquirer: 'acquirer',
-//   transaction: 'trans_910101',
-//   order: 'order_262625',
-//   gosellID: null,
-// };
 
-const allConfigurations = totalAmount => {
+const allConfigurations = (totalAmount, customer_detail) => {
+  console.log(totalAmount);
   const appCredentials = {
-    //   production_secrete_key:
-    //     Platform.OS == 'ios' ? 'iOS-Live-KEY' : 'sk_live_ZwpjAmBd3Hf1zS7EiCP9rx8g',
+    // production_secrete_key:
+    //   Platform.OS === 'ios'
+    //     ? 'iOS-Live-KEY'
+    //     : 'sk_live_ZwpjAmBd3Hf1zS7EiCP9rx8g',
     language: Languages.EN,
     sandbox_secrete_key:
-      Platform.OS == 'ios'
-        ? 'iOS-SANDBOX-KEY'
+      Platform.OS === 'ios'
+        ? 'sk_test_XKokBfNWv6FIYuTMg5sLPjhJ'
         : 'sk_test_L4y8obVBrTICKMDFxqEQS6R7',
-    bundleID: Platform.OS == 'ios' ? 'iOS-PACKAGE-NAME' : 'com.mighzal',
+    // : 'sk_test_L4y8obVBrTICKMDFxqEQS6R7',
+    bundleID: Platform.OS === 'ios' ? 'iOS-PACKAGE-NAME' : 'com.mighzal',
   };
 
   const transactionCurrency = 'kwd';
   const shipping = [
     {
-      name: 'shipping 1',
-      description: 'shiping description 1',
-      amount: Number(totalAmount), // main amount for payment
+      name: 'test 1',
+      description: 'test description 1',
+      // amount: Number(totalAmount), // main amount for payment
+      amount: 0,
     },
   ];
+
+  const customer = {
+    // Here we can set the customer object as on of the available options on this URL:
+    // See [https://github.com/Tap-Payments/gosellSDK-ReactNative#customer] to get more details of setting the customer
+    isdNumber: '',
+    number: customer_detail?.phone,
+    customerId: '',
+    first_name: customer_detail?.first_name,
+    middle_name: '',
+    last_name: customer_detail?.last_name,
+    email: customer_detail?.email,
+  };
 
   return {
     appCredentials: appCredentials,
     sessionParameters: {
-      paymentStatementDescriptor: 'paymentStatementDescriptor',
+      paymentStatementDescriptor: 'testDescriptor.',
       transactionCurrency,
       isUserAllowedToSaveCard: true,
       paymentType: PaymentTypes.ALL,
-      amount: '',
+      amount: totalAmount.toString(),
       shipping: shipping,
       allowedCadTypes: AllowedCadTypes.ALL,
       // paymenMetaData: {a: 'a meta', b: 'b meta'},
@@ -106,7 +112,7 @@ const allConfigurations = totalAmount => {
       cardHolderName: '',
       editCardHolderName: true,
       postURL: 'https://tap.company',
-      paymentDescription: 'paymentDescription',
+      paymentDescription: 'testDescription',
       destinations: 'null',
       // Here we can set the transaction mode as on of the available options on this URL:
       // See [https://github.com/Tap-Payments/gosellSDK-ReactNative#transaction_modes] to get transaction modes
@@ -114,11 +120,11 @@ const allConfigurations = totalAmount => {
       // taxes: taxes,
       merchantID: '',
       SDKMode: SDKMode.Sandbox,
-      // customer: customer,
-      isRequires3DSecure: false,
-      receiptSettings: {id: null, email: false, sms: true},
+      customer: customer,
+      isRequires3DSecure: true,
+      receiptSettings: {id: null, email: true, sms: false},
       allowsToSaveSameCardMoreThanOnce: false,
-      // paymentReference: paymentReference,
+      paymentReference: paymentReference,
       uiDisplayMode: UiDisplayModes.LIGHT,
     },
   };

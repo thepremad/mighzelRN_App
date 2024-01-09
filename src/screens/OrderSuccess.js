@@ -1,5 +1,13 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import {View, Text, Image, StyleSheet, SafeAreaView} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+} from 'react-native';
 import React from 'react';
 import {
   widthPercentageToDP as wp,
@@ -11,10 +19,7 @@ import {useSelector} from 'react-redux';
 import WebView from 'react-native-webview';
 
 const OrderScreen = ({navigation, route}) => {
-  const {billing_address} = useSelector(state => state.cart.cartData);
-  const data = route?.params?.data;
-
-  console.log('data', data);
+  const {billing, order_number, trx_ID} = route?.params;
 
   // return (
   //   <WebView
@@ -45,13 +50,15 @@ const OrderScreen = ({navigation, route}) => {
           backgroundColor: '#d680887a',
           borderRadius: wp(10),
           padding: wp(4),
+          alignSelf: 'center',
         }}>
         <Icon source="check" size={wp(7)} color="#fff" />
       </View>
       <Text style={styles.orderText}>Order has been placed,</Text>
       <Text style={styles.thankYouText}>Thank you</Text>
       <Text style={styles.orderConfimationText}>
-        Order confimation has been send to your email
+        Order <Text style={{color: '#d68088'}}>#{order_number}</Text>{' '}
+        confimation has been send to your email
       </Text>
 
       <Text style={{fontSize: wp(4), color: '#454242', alignSelf: 'center'}}>
@@ -66,13 +73,28 @@ const OrderScreen = ({navigation, route}) => {
           ]}>
           Delivery address
         </Text>
-
-        <Text style={[styles.delivryText, {marginTop: hp(4)}]}>
-          {billing_address?.address_1}
-        </Text>
-        <Text style={[styles.delivryText]}>{billing_address?.address_2}</Text>
-
-        <Text style={styles.delivryText}>{billing_address?.city}</Text>
+        {Object.keys(billing).map((key, index) => (
+          <View
+            style={[
+              {flexDirection: 'row', justifyContent: 'space-between'},
+              index + 1 !== Object.keys(billing).length && {
+                borderBottomColor: '#fff',
+                borderBottomWidth: 2,
+              },
+            ]}>
+            <Text style={[styles.delivryText, {marginTop: hp(1)}]}>
+              {key.replace('_', ' ')}
+            </Text>
+            <Text
+              style={[
+                styles.delivryText,
+                {marginTop: hp(1)},
+                key === 'email' && {textTransform: 'lowercase'},
+              ]}>
+              {billing[key]}
+            </Text>
+          </View>
+        ))}
       </View>
     </SafeAreaView>
   );
@@ -108,20 +130,24 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#454242',
     marginTop: hp(2),
+    marginHorizontal: wp(1),
+    textAlign: 'center',
   },
 
   deliveryBox: {
-    height: hp(18),
+    // height: hp(18),
     backgroundColor: '#f0f0f0',
     marginTop: hp(4),
-    paddingLeft: wp(1),
     borderRadius: wp(2),
     width: wp(96),
+    padding: hp(1),
+    marginBottom: hp(1),
   },
 
   delivryText: {
     fontSize: wp(4),
     color: '#000',
     fontWeight: '400',
+    textTransform: 'capitalize',
   },
 });

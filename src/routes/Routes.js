@@ -4,7 +4,6 @@ import LoggedOutNavigator from './LoggedOutNavigator';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {useSelector} from 'react-redux';
 import SplashScreen from '../screens/SplashScreen';
-import PaymentUI from '../payment_gateway/PaymentUI';
 
 const Routes = ({skipLogin}) => {
   const {mainRoute} = useSelector(state => state.route);

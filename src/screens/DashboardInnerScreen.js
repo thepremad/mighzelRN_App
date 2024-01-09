@@ -17,7 +17,7 @@ const DashboardInnerScreen = () => {
       <Header
         navAction="back"
         title="Dashboard"
-        titleStyle={{fontSize: wp(4), fontFamily: 'Roboto-Light'}}
+        titleStyle={{fontSize: wp(4), fontFamily: 'Montserrat-Light'}}
       />
       <View style={styles.homeContainer}>
         <Text
@@ -26,7 +26,7 @@ const DashboardInnerScreen = () => {
             width: wp(45),
             marginLeft: wp(4),
             color: '#000',
-            fontFamily: 'Roboto-Light',
+            fontFamily: 'Montserrat-Light',
             marginTop: hp(3),
           }}>
           Hello hh@gmail.com not hh @gmail.com? Log Out
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   dashboardText: {
     color: '#000',
-    fontFamily: 'Roboto-Regular',
+    fontFamily: 'Montserrat-Regular',
     marginLeft: wp(4),
   },
   righArrowImage: {
@@ -72,7 +72,7 @@ const styles = StyleSheet.create({
     width: wp(85),
     marginLeft: wp(4),
     color: '#000',
-    fontFamily: 'Roboto-Light',
+    fontFamily: 'Montserrat-Light',
     marginTop: hp(6),
   },
 });

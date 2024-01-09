@@ -20,11 +20,11 @@ const OrderDetails = ({navigation, route}) => {
         <Text style={styles.orderDetilText}>Order Details:</Text>
         <Text style={styles.orderText}>
           Order{' '}
-          <Text style={{color: 'green', fontFamily: 'Roboto-Medium'}}>
+          <Text style={{color: 'green', fontFamily: 'Montserrat-Medium'}}>
             #{details?.order_number}
           </Text>{' '}
           was placed on{' '}
-          <Text style={{color: 'orange', fontFamily: 'Roboto-Medium'}}>
+          <Text style={{color: 'orange', fontFamily: 'Montserrat-Medium'}}>
             {details?.date_created}
           </Text>{' '}
           and it is currently processing
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
   orderDetilText: {
     fontSize: wp(4),
     color: '#d68088',
-    fontFamily: 'Roboto-Bold',
+    fontFamily: 'Montserrat-SemiBold',
     marginTop: hp(4),
     marginLeft: wp(2),
   },
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
   productText: {
     fontSize: wp(4),
     color: '#000',
-    fontFamily: 'Roboto-Regular',
+    fontFamily: 'Montserrat-Regular',
   },
 
   BillingBox: {

@@ -48,7 +48,7 @@ const DeliveredScreen = ({navigation}) => {
 
   console.log(orderData);
 
-  const data = orderData.filter(item => item.status === 'delivered');
+  const data = orderData.filter(item => item.status === 'completed');
 
   useEffect(() => {
     const timeOutID = setTimeout(() => setLoader(false), 3000);
@@ -74,7 +74,7 @@ const DeliveredScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Medium',
+              fontFamily: 'Montserrat-Medium',
               color: '#838383',
               marginLeft: 'auto',
             }}>
@@ -84,7 +84,7 @@ const DeliveredScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Bold',
+              fontFamily: 'Montserrat-SemiBold',
               color: '#000',
             }}>
             {item.order_id}
@@ -95,14 +95,14 @@ const DeliveredScreen = ({navigation}) => {
             <Text
               style={{
                 fontSize: wp(3.9),
-                fontFamily: 'Roboto-Bold',
+                fontFamily: 'Montserrat-SemiBold',
                 color: '#000',
               }}>
               Quantity:{' '}
               <Text
                 style={{
                   fontSize: wp(3.9),
-                  fontFamily: 'Roboto-Bold',
+                  fontFamily: 'Montserrat-SemiBold',
                   color: '#999',
                 }}>
                 {item.quantity}
@@ -112,7 +112,7 @@ const DeliveredScreen = ({navigation}) => {
             <Text
               style={{
                 fontSize: wp(3.9),
-                fontFamily: 'Roboto-Bold',
+                fontFamily: 'Montserrat-SemiBold',
                 color: '#999',
                 marginLeft: 'auto',
               }}>
@@ -120,7 +120,7 @@ const DeliveredScreen = ({navigation}) => {
               <Text
                 style={{
                   fontSize: wp(3.9),
-                  fontFamily: 'Roboto-Bold',
+                  fontFamily: 'Montserrat-SemiBold',
                   color: '#000',
                 }}>
                 {item.total} KWD
@@ -131,7 +131,7 @@ const DeliveredScreen = ({navigation}) => {
           <Text
             style={{
               fontSize: wp(3.9),
-              fontFamily: 'Roboto-Regular',
+              fontFamily: 'Montserrat-Regular',
               color: 'green',
               marginLeft: 'auto',
               textTransform: 'capitalize',
@@ -154,7 +154,7 @@ const DeliveredScreen = ({navigation}) => {
             renderItem={ItemView}
             ListEmptyComponent={() => (
               <View style={{alignItems: 'center'}}>
-                <Text style={{}}>No data found !</Text>
+                <Text style={{}}>No orders found !</Text>
               </View>
             )}
             keyExtractor={(item, index) => index.toString()}

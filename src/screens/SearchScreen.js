@@ -155,7 +155,7 @@ const SearchScreen = ({navigation, route}) => {
                 onPress={() => handleSearchedProduct(item.product_id)}>
                 <Text
                   style={{
-                    fontFamily: 'Roboto-Light',
+                    fontFamily: 'Montserrat-Light',
                     paddingVertical: hp(1),
                     paddingHorizontal: wp(4),
                   }}>

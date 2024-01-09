@@ -13,6 +13,7 @@ import {
   FlatList,
   StatusBar,
   ScrollView,
+  RefreshControl,
 } from 'react-native';
 import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
 import {
@@ -52,12 +53,14 @@ const CartMighzal = ({navigation}) => {
   const [quantity_limits, setQuantity_limits] = useState({});
   const [loader, setLoader] = useState(false);
   const dispatch = useDispatch();
-  const {cartData, isLoading, error} = useSelector(state => state.cart);
-  const focus = useIsFocused();
+  const {cartData, isLoading, shimmer, error} = useSelector(
+    state => state.cart,
+  );
+  const isFocus = useIsFocused();
   console.log('cart', {cartData, isLoading, error});
 
   useEffect(() => {
-    if (!focus) {
+    if (!isFocus) {
       setCouponCode('');
 
       const {total_price, total_discount} = cartData?.totals;
@@ -73,7 +76,7 @@ const CartMighzal = ({navigation}) => {
 
       dispatch(fetchCartDataSuccess(dataToSave));
     }
-  }, [focus]);
+  }, [isFocus, dispatch]);
 
   useEffect(() => {
     dispatch(fetchCartDataRequest());
@@ -361,7 +364,7 @@ const CartMighzal = ({navigation}) => {
                   style={{
                     color: '#000',
                     fontSize: wp(4),
-                    fontFamily: 'Roboto-Light',
+                    fontFamily: 'Montserrat-Light',
                     marginRight: wp(3),
                   }}>
                   Qty
@@ -393,7 +396,7 @@ const CartMighzal = ({navigation}) => {
                       style={{
                         fontSize: wp(4.5),
                         color: '#000',
-                        fontFamily: 'Roboto-Light',
+                        fontFamily: 'Montserrat-Light',
                         marginHorizontal: wp(2),
                         width: wp(13),
                         textAlign: 'center',
@@ -405,7 +408,7 @@ const CartMighzal = ({navigation}) => {
                 </RectButton>
               </View>
               <Text style={{marginBottom: hp(2)}}>
-                {Number(item?.total)?.toFixed(2) || 0} KWD
+                {(Number(item?.total) || 0)?.toFixed(2)} KWD
               </Text>
               {/* <WebView
                 source={{html: item?.price_html}}
@@ -422,6 +425,11 @@ const CartMighzal = ({navigation}) => {
       )),
     [cartData],
   );
+
+  const colors = ['red', 'blue', 'green', 'orange'];
+  const handleRefresh = () => {
+    dispatch(fetchCartDataRequest());
+  };
 
   // const FlatListHeaderComponent = useMemo(
   //   () =>
@@ -451,7 +459,7 @@ const CartMighzal = ({navigation}) => {
   //             right: 20,
   //             top: -10,
   //           }}>
-  //           <Text style={{color: '#ffffff', fontFamily: 'Roboto-Medium'}}>
+  //           <Text style={{color: '#ffffff', fontFamily: 'Montserrat-Medium'}}>
   //             Apply
   //           </Text>
   //         </TouchableOpacity>
@@ -464,7 +472,7 @@ const CartMighzal = ({navigation}) => {
     <View style={styles.container}>
       <StatusBar backgroundColor={'#fff'} barStyle="dark-content" />
 
-      {loader && (
+      {/* {loader && (
         <View
           style={{
             position: 'absolute',
@@ -475,7 +483,7 @@ const CartMighzal = ({navigation}) => {
           }}>
           <ActivityIndicator size="large" color="#D68088" />
         </View>
-      )}
+      )} */}
 
       <Modal
         onBackdropPress={() => setVisibleID(null)}
@@ -512,18 +520,26 @@ const CartMighzal = ({navigation}) => {
 
       <Text
         style={{
-          fontSize: 22,
+          fontSize: wp(5.5),
           color: '#000000',
           marginVertical: hp(2),
           marginHorizontal: wp(4),
+          fontFamily: 'Montserrat-SemiBold',
         }}>
         Cart
       </Text>
-      {isLoading ? (
+      {shimmer ? (
         <CartShimmer />
       ) : (
         <>
-          <ScrollView>
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={loader || isLoading}
+                onRefresh={handleRefresh}
+                colors={colors}
+              />
+            }>
             <View style={{marginBottom: hp(2)}}>
               <TextInput
                 placeholder="Enter Promo code"
@@ -548,7 +564,8 @@ const CartMighzal = ({navigation}) => {
                   right: wp(4),
                   bottom: 5,
                 }}>
-                <Text style={{color: '#ffffff', fontFamily: 'Roboto-Medium'}}>
+                <Text
+                  style={{color: '#ffffff', fontFamily: 'Montserrat-Medium'}}>
                   Apply
                 </Text>
               </TouchableOpacity>
@@ -569,7 +586,7 @@ const CartMighzal = ({navigation}) => {
                 marginHorizontal: wp(4),
                 color: '#000',
                 fontSize: wp(4.3),
-                fontFamily: 'Roboto-Medium',
+                fontFamily: 'Montserrat-Medium',
                 borderBottomWidth: 1.5,
                 paddingVertical: hp(0.5),
               }}>
@@ -595,7 +612,8 @@ const CartMighzal = ({navigation}) => {
                   elevation: cartData?.items?.length < 1 ? 0 : 5,
                   marginHorizontal: wp(4),
                 }}>
-                <Text style={{color: '#ffffff', fontFamily: 'Roboto-Medium'}}>
+                <Text
+                  style={{color: '#ffffff', fontFamily: 'Montserrat-Medium'}}>
                   Check Out
                 </Text>
               </TouchableOpacity>
@@ -607,25 +625,31 @@ const CartMighzal = ({navigation}) => {
                   marginLeft: wp(4),
                 }}>
                 <View>
-                  <Text style={{fontFamily: 'Roboto-Light', color: '#888'}}>
+                  <Text style={{fontFamily: 'Montserrat-Light', color: '#888'}}>
                     Discount
                   </Text>
-                  <Text style={{fontFamily: 'Roboto-Medium', color: 'black'}}>
+                  <Text
+                    style={{fontFamily: 'Montserrat-Medium', color: 'black'}}>
                     Total
                   </Text>
                 </View>
                 <View>
                   <Text
                     style={{
-                      fontFamily: 'Roboto-Light',
+                      fontFamily: 'Montserrat-Light',
                       alignSelf: 'flex-end',
                       color: '#888',
                       // textDecorationLine: 'line-through',
                     }}>
-                    {cartData?.totals?.total_discount || 0} KWD
+                    {(Number(cartData?.totals?.total_discount) || 0)?.toFixed(
+                      2,
+                    )}{' '}
+                    KWD
                   </Text>
-                  <Text style={{fontFamily: 'Roboto-Medium', color: 'black'}}>
-                    {cartData?.totals?.total_price || 0} KWD
+                  <Text
+                    style={{fontFamily: 'Montserrat-Medium', color: 'black'}}>
+                    {(Number(cartData?.totals?.total_price) || 0)?.toFixed(2)}{' '}
+                    KWD
                   </Text>
                 </View>
               </View>
@@ -665,6 +689,6 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#fff',
     paddingVertical: hp(2),
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
   },
 });

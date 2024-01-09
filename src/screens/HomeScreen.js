@@ -179,6 +179,7 @@ const HomeScreen = ({navigation}) => {
             marginRight: wp(4),
             width: wp(25),
             fontSize: wp(3.4),
+            fontFamily: 'Montserrat-Medium',
           }}>
           WELCOME{name ? '\n' + name : null}
         </Text>
@@ -362,7 +363,8 @@ const styles = StyleSheet.create({
     color: '#cf8385',
     textAlign: 'center',
     marginVertical: hp(2),
-    fontFamily: 'Roboto-Bold',
+    fontFamily: 'Montserrat-Medium',
+    textTransform: 'uppercase',
   },
   buttonContainer: {
     height: hp(5.6),
@@ -375,8 +377,8 @@ const styles = StyleSheet.create({
     borderColor: '#cf8385',
   },
   buttonText: {
-    fontSize: wp(3.9),
-    fontFamily: 'Roboto-Medium',
+    fontSize: wp(3.5),
+    fontFamily: 'Montserrat-Medium',
     color: '#cf8385',
     textAlign: 'center',
   },

@@ -16,22 +16,41 @@ import FastImage from 'react-native-fast-image';
 import {useDispatch} from 'react-redux';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
-const RenderProducts = ({item, index, home}) => {
+const RenderProducts = ({item, index, home, handleRelatedProd}) => {
   // const [imageLoading, setImageLoading] = useState([]);
   const dispatch = useDispatch();
-  console.log('<RenderProducts />');
   const navigation = useNavigation();
   const route = useRoute();
 
+  console.log('item', route?.name, item);
+
   const handleProductDetails = useCallback(
     product_id => {
+      // switch (route.name) {
+      //   case 'ProductList-Category':
+      //     navigation.navigate('ProductDetails-Category', {product_id});
+      //     break;
+
+      //   case 'HomeScreen' || 'ProductList-Home':
+      //     navigation.navigate('ProductDetails-Home', {product_id});
+      //     break;
+
+      //   case 'ProductDetails-Home' || 'ProductDetails-Category':
+      //     handleRelatedProd(product_id);
+      // }
+
       if (route.name === 'ProductList-Category') {
         navigation.navigate('ProductDetails-Category', {product_id});
       } else if (
-        route.name === 'ProductDetails-Home' ||
-        route.name === 'HomeScreen'
+        route.name === 'HomeScreen' ||
+        route.name === 'ProductList-Home'
       ) {
         navigation.navigate('ProductDetails-Home', {product_id});
+      } else if (
+        route.name === 'ProductDetails-Home' ||
+        route.name === 'ProductDetails-Category'
+      ) {
+        handleRelatedProd(product_id);
       }
     },
     [route, navigation],
@@ -40,7 +59,7 @@ const RenderProducts = ({item, index, home}) => {
   return (
     <TouchableOpacity
       onPress={() => handleProductDetails(item.product_id)}
-      activeOpacity={1}
+      activeOpacity={0.9}
       style={styles.container}>
       <FastImage
         style={styles.image}
@@ -103,10 +122,10 @@ const styles = StyleSheet.create({
     // height: hp(21),
   },
   nameText: {
-    fontSize: wp(3.8),
-    color: '#000',
-    fontFamily: 'Roboto-Light',
-    textTransform: 'capitalize',
+    fontSize: wp(3.5),
+    color: '#c6930a',
+    fontFamily: 'Montserrat-Medium',
+    textTransform: 'uppercase',
     marginRight: wp(1.9),
   },
   mrpText: {
@@ -118,5 +137,6 @@ const styles = StyleSheet.create({
   priceText: {
     color: '#d68088',
     fontSize: wp(3),
+    fontFamily: 'Montserrat-Regular',
   },
 });
