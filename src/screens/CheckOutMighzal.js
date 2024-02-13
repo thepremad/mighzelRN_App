@@ -26,6 +26,7 @@ import {makeRequest} from '../api/ApiInfo';
 import {fetchCartDataSuccess} from '../redux/action/cartActions';
 import PaymentUI from '../payment_gateway/PaymentUI';
 import {fetchUserDataRequest} from '../redux/action/userActions';
+import {CheckBox, Icon} from '@rneui/themed';
 
 const CheckOutMighzal = ({navigation, route}) => {
   const [selectedPayment, setSelectedPayment] = useState('');
@@ -242,7 +243,6 @@ const CheckOutMighzal = ({navigation, route}) => {
             backgroundColor: '#eee',
             marginHorizontal: wp(4),
             padding: hp(1.5),
-            // elevation: 3,
           }}>
           {(cartData?.items || [])?.map(item => (
             <View
@@ -252,7 +252,7 @@ const CheckOutMighzal = ({navigation, route}) => {
                 justifyContent: 'space-between',
                 marginTop: hp(1),
               }}>
-              <Text>Ella ring</Text>
+              <Text>{item?.product_name}</Text>
               <Text>{item?.total}.00 KWD</Text>
             </View>
           ))}
@@ -340,6 +340,7 @@ const CheckOutMighzal = ({navigation, route}) => {
                   fontFamily: 'Montserrat-Medium',
                   fontSize: wp(4.5),
                   textTransform: 'capitalize',
+                  marginBottom: hp(0.5),
                 }}>
                 {(shipping_address?.first_name || '') +
                   ' ' +
@@ -347,44 +348,47 @@ const CheckOutMighzal = ({navigation, route}) => {
               </Text>
             )}
 
-            {(shipping_address?.address_1 || shipping_address?.address_2) && (
-              <>
-                <Text
-                  style={{
-                    color: '#000',
-                    fontFamily: 'Montserrat-Light',
-                    fontSize: wp(4.2),
-                  }}>
-                  {(shipping_address?.address_1 || '') +
-                    ' ' +
-                    (shipping_address?.address_2 || '')}
-                </Text>
+            {shipping_address?.address_1 && (
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Montserrat-Light',
+                  fontSize: wp(4.2),
+                }}>
+                {(shipping_address?.address_1 || '') +
+                  ' ' +
+                  (shipping_address?.address_2 || '')}
+              </Text>
+            )}
 
-                <Text
-                  style={{
-                    color: '#000',
-                    fontFamily: 'Montserrat-Light',
-                    fontSize: wp(4.2),
-                  }}>
-                  {(shipping_address?.city || '') +
-                    ', ' +
-                    (shipping_address?.postcode || '') +
-                    ', ' +
-                    (shipping_address?.country || '')}
-                </Text>
-              </>
+            {shipping_address?.postcode && (
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Montserrat-Light',
+                  fontSize: wp(4.2),
+                }}>
+                {(shipping_address?.city || '') +
+                  ', ' +
+                  (shipping_address?.postcode || '') +
+                  ', ' +
+                  (shipping_address?.country || '')}
+              </Text>
             )}
           </View>
 
-          <Text
-            onPress={() => navigation.navigate('AddShippingAddressScreen-Cart')}
-            style={{
-              color: '#e7b6b5',
-              fontFamily: 'Montserrat-Medium',
-              fontSize: wp(4.5),
-            }}>
-            Change
-          </Text>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() =>
+              navigation.navigate('AddShippingAddressScreen-Cart')
+            }>
+            <Icon
+              type="font-awesome"
+              name="angle-right"
+              size={wp(8)}
+              containerStyle={{padding: wp(3)}}
+            />
+          </TouchableOpacity>
         </View>
 
         <View
@@ -396,13 +400,11 @@ const CheckOutMighzal = ({navigation, route}) => {
           }}
         />
 
-        {/* SHIPING END */}
-
         <Text
           style={{
             color: '#e7b6b5',
             fontFamily: 'Roboto-Bold',
-            fontSize: wp(5),
+            fontSize: wp(4.3),
             marginHorizontal: wp(4),
           }}>
           Payment
@@ -412,13 +414,30 @@ const CheckOutMighzal = ({navigation, route}) => {
             flexDirection: 'row',
             marginVertical: hp(1),
             alignItems: 'center',
+            marginHorizontal: wp(3),
           }}>
-          <RadioButton
+          {/* <RadioButton
             uncheckedColor="#999"
             color="#d68088"
             value={selectedPayment}
             status={selectedPayment === 'cod' ? 'checked' : 'unchecked'}
             onPress={() => setSelectedPayment('cod')}
+          /> */}
+          <CheckBox
+            checked={selectedPayment === 'cod'}
+            onPress={() => setSelectedPayment('cod')}
+            // Use ThemeProvider to make change for all checkbox
+            iconType="material-community"
+            checkedIcon="checkbox-marked"
+            uncheckedIcon="checkbox-blank-outline"
+            checkedColor="#000"
+            uncheckedColor="#000"
+            containerStyle={{
+              margin: 0,
+              marginLeft: 0,
+              marginRight: 0,
+              padding: 0,
+            }}
           />
           <Text style={styles.radioButtonText}>
             Cash on delivery (kuwait only)
@@ -430,18 +449,44 @@ const CheckOutMighzal = ({navigation, route}) => {
             flexDirection: 'row',
             marginVertical: hp(1),
             alignItems: 'center',
+            marginHorizontal: wp(3),
           }}>
-          <RadioButton
+          <CheckBox
+            checked={selectedPayment === 'tap'}
+            onPress={() => setSelectedPayment('tap')}
+            // Use ThemeProvider to make change for all checkbox
+            iconType="material-community"
+            checkedIcon="checkbox-marked"
+            uncheckedIcon="checkbox-blank-outline"
+            checkedColor="#000"
+            uncheckedColor="#000"
+            containerStyle={{
+              margin: 0,
+              marginLeft: 0,
+              marginRight: 0,
+              padding: 0,
+            }}
+          />
+          {/* <RadioButton
             uncheckedColor="#999"
             color="#d68088"
             value={selectedPayment}
             status={selectedPayment === 'tap' ? 'checked' : 'unchecked'}
             onPress={() => setSelectedPayment('tap')}
-          />
+          /> */}
           <Text style={styles.radioButtonText}>
             Pay by Debit/Credit card only
           </Text>
         </View>
+
+        <View
+          style={{
+            backgroundColor: '#ccc',
+            height: 1,
+            marginHorizontal: wp(4),
+            marginVertical: hp(1),
+          }}
+        />
       </ScrollView>
       <PaymentUI
         amount={Number(route?.params?.total_price)?.toFixed(2)}
@@ -474,6 +519,6 @@ const styles = StyleSheet.create({
     fontSize: wp(4.2),
     fontFamily: 'Montserrat-Light',
     color: '#000000',
-    marginLeft: wp(8),
+    marginLeft: wp(2),
   },
 });

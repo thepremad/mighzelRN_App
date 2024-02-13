@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 
@@ -159,16 +160,25 @@ const AddressAddNewShipping = ({navigation, route}) => {
   };
 
   const handleSave = async () => {
-    try {
-      const addType =
-        selectedAddress === 1 ? 'shipping_address' : 'billing_address';
+    let err = false;
+    for (let key in inputs) {
+      if (inputs[key]?.toString()?.trim() === '') {
+        err = true;
+      }
+    }
 
+    if (err) {
+      Alert.alert('', 'Please fill all the fields');
+      return false;
+    }
+
+    try {
       const update = {
         ...cartData,
-        [addType]: inputs,
+        shipping_address: inputs,
       };
-
       const customer_id = await getData(async_keys.customer_id);
+
       setLoader(true);
       const res = await makeRequest(
         `update_shipping_address`,

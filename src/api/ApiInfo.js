@@ -7,7 +7,6 @@ export const BASE_URL = 'https://staging.premad.in/mighal/api/';
 export const makeRequest = async (api, params = null, post = false) => {
   const token = await getData(async_keys.auth_token);
   const url = `${BASE_URL}${api}`;
-  // console.log(token);
 
   try {
     // request info
