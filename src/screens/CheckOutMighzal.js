@@ -229,373 +229,230 @@ const CheckOutMighzal = ({navigation, route}) => {
       <ScrollView style={{margin: hp(0.8)}}>
         <Text
           style={{
-            color: '#000000',
-            fontFamily: 'Montserrat-Medium',
-            margin: hp(1),
-            fontSize: wp(4.5),
+            color: '#e7b6b5',
+            fontFamily: 'Roboto-Bold',
+            fontSize: wp(4.3),
+            marginHorizontal: wp(4),
           }}>
-          Additional Information
+          Order Details:
         </Text>
-
-        <Text
-          style={{
-            color: '#000000',
-            fontFamily: 'Montserrat-Light',
-            marginHorizontal: hp(1),
-            marginBottom: hp(0.5),
-            marginTop: hp(1.5),
-          }}>
-          ADD A NOTE TO YOUR ORDER (OPTIONAL)
-        </Text>
-
-        <TextInput
-          style={{
-            backgroundColor: '#ffffff',
-            paddingVertical: hp(0.5),
-            elevation: 3,
-          }}
-        />
-
         <View
           style={{
-            marginVertical: hp(3),
-            backgroundColor: '#fff',
-            elevation: 3,
+            marginVertical: hp(1),
+            backgroundColor: '#eee',
+            marginHorizontal: wp(4),
+            padding: hp(1.5),
+            // elevation: 3,
           }}>
-          <Text
+          {(cartData?.items || [])?.map(item => (
+            <View
+              key={item?.product_id?.toString()}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: hp(1),
+              }}>
+              <Text>Ella ring</Text>
+              <Text>{item?.total}.00 KWD</Text>
+            </View>
+          ))}
+
+          <View
             style={{
-              alignSelf: 'center',
-              fontSize: wp(5),
-              fontFamily: 'Montserrat-Medium',
-              color: '#000000',
+              backgroundColor: '#ccc',
+              height: 1,
               marginVertical: hp(1),
-            }}>
-            Your Order
-          </Text>
+              marginTop: hp(2),
+            }}
+          />
+
           <View
             style={{
               flexDirection: 'row',
-              marginVertical: hp(1),
               justifyContent: 'space-between',
-              marginHorizontal: wp(2.5),
-            }}>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>Order</Text>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>
-              {Number(route?.params?.total_price)?.toFixed(2)}
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(1),
-              justifyContent: 'space-between',
-              marginHorizontal: wp(2.5),
-            }}>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>Delivery</Text>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>
-              {/* {cartData?.totals?.total_discount} */}0
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(1),
-              justifyContent: 'space-between',
-              marginHorizontal: wp(2.5),
             }}>
             <Text
               style={{
-                color: '#000000',
-                fontSize: wp(4),
-                fontFamily: 'Montserrat-Medium',
+                color: '#000',
+                fontFamily: 'Roboto-Medium',
               }}>
-              Summary
+              Shipping :
+            </Text>
+            <Text>{cartData?.totals?.total_shipping}.00 KWD</Text>
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Medium',
+                marginTop: hp(1),
+              }}>
+              Total :
             </Text>
             <Text
               style={{
-                color: '#000000',
-                fontSize: wp(4),
-                fontFamily: 'Montserrat-Medium',
+                marginTop: hp(1),
               }}>
-              {Number(route?.params?.total_price)?.toFixed(2)}
+              {cartData?.totals?.total_price}.00 KWD
             </Text>
           </View>
         </View>
 
         {/* SHIPING START */}
-        <View style={{backgroundColor: '#fff', elevation: 5}}>
-          <Text
-            style={{
-              color: '#000000',
-              fontFamily: 'Montserrat-Medium',
-              marginVertical: hp(1.2),
-              fontSize: wp(4),
-              marginHorizontal: wp(2.5),
-            }}>
-            Shippping address
-          </Text>
-        </View>
-
-        <RectButton
-          onPress={() =>
-            navigation.navigate('AddShippingAddressScreen-Cart', {
-              type: 1,
-            })
-          }
-          rippleColor={'#B04F58'}
-          style={{
-            height: hp(5),
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginHorizontal: wp(4),
-            marginVertical: hp(2.5),
-            borderRadius: wp(1.5),
-            backgroundColor: '#d68088',
-            elevation: 5,
-          }}>
-          <Text
-            style={{
-              fontSize: wp(4.5),
-              fontFamily: 'Montserrat-Medium',
-              color: '#fff',
-            }}>
-            Add Shippping Address
-          </Text>
-        </RectButton>
-
-        {shipping_address && (
-          <View
-            style={{
-              backgroundColor: '#fff',
-              marginBottom: hp(3),
-              elevation: 3,
-              paddingLeft: wp(10),
-              paddingVertical: hp(2),
-            }}>
-            <Text
-              style={{
-                color: '#000',
-                fontFamily: 'Montserrat-Light',
-                fontSize: wp(4.2),
-              }}>
-              {shipping_address?.first_name}
-            </Text>
-
-            <Text
-              style={{
-                color: '#000',
-                fontFamily: 'Montserrat-Light',
-                fontSize: wp(4.2),
-              }}>
-              {shipping_address?.address_1}
-            </Text>
-
-            <Text
-              style={{
-                color: '#000',
-                fontFamily: 'Montserrat-Light',
-                fontSize: wp(4.2),
-              }}>
-              {shipping_address?.address_2}
-            </Text>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: hp(2),
-              }}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={selectedAddress}
-                status={selectedAddress === 1 ? 'checked' : 'unchecked'}
-                onPress={() =>
-                  setSelectedAddress(selectedAddress === 1 ? null : 1)
-                }
-              />
-              <Text
-                style={[
-                  styles.radioButtonText,
-                  {fontFamily: 'Montserrat-Regular'},
-                ]}>
-                Select as a billing address
-              </Text>
-            </View>
-          </View>
-        )}
-        {/* SHIPING END */}
-        {/* BILLING START */}
-        <View style={{backgroundColor: '#fff', elevation: 5}}>
-          <Text
-            style={{
-              color: '#000000',
-              fontFamily: 'Montserrat-Medium',
-              marginVertical: hp(1.2),
-              fontSize: wp(4),
-              marginHorizontal: wp(2.5),
-            }}>
-            Billing address
-          </Text>
-        </View>
-
-        <RectButton
-          onPress={() =>
-            navigation.navigate('AddShippingAddressScreen-Cart', {
-              type: 2,
-            })
-          }
-          rippleColor={'#B04F58'}
-          style={{
-            height: hp(5),
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginHorizontal: wp(4),
-            marginVertical: hp(2.5),
-            borderRadius: wp(1.5),
-            backgroundColor: '#d68088',
-            elevation: 5,
-          }}>
-          <Text
-            style={{
-              fontSize: wp(4.5),
-              fontFamily: 'Montserrat-Medium',
-              color: '#fff',
-            }}>
-            Add Billing Address
-          </Text>
-        </RectButton>
-
-        {billing_address && (
-          <View
-            style={{
-              backgroundColor: '#fff',
-              marginBottom: hp(3),
-              elevation: 3,
-              paddingLeft: wp(10),
-              paddingVertical: hp(2),
-            }}>
-            <Text
-              style={{
-                color: '#000',
-                fontFamily: 'Montserrat-Light',
-                fontSize: wp(4.2),
-              }}>
-              {billing_address?.first_name}
-            </Text>
-
-            <Text
-              style={{
-                color: '#000',
-                fontFamily: 'Montserrat-Light',
-                fontSize: wp(4.2),
-              }}>
-              {billing_address?.address_1}
-            </Text>
-
-            <Text
-              style={{
-                color: '#000',
-                fontFamily: 'Montserrat-Light',
-                fontSize: wp(4.2),
-              }}>
-              {billing_address?.address_2}
-            </Text>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: hp(2),
-              }}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={selectedAddress}
-                status={selectedAddress === 2 ? 'checked' : 'unchecked'}
-                onPress={() =>
-                  setSelectedAddress(selectedAddress === 2 ? null : 2)
-                }
-              />
-              <Text
-                style={[
-                  styles.radioButtonText,
-                  {fontFamily: 'Montserrat-Regular'},
-                ]}>
-                Select as a shippping address
-              </Text>
-            </View>
-          </View>
-        )}
-        {/* BILLING START */}
 
         <View
           style={{
-            backgroundColor: '#fff',
-            marginBottom: hp(3),
-            elevation: 3,
-          }}>
-          <Text
-            style={{
-              color: '#000000',
-              fontFamily: 'Montserrat-Medium',
-              marginTop: hp(1.2),
-              fontSize: wp(4),
-              marginHorizontal: wp(2.5),
-            }}>
-            Payment
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(3),
-              alignItems: 'center',
-            }}>
-            <View style={{marginLeft: wp(10)}}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={selectedPayment}
-                status={selectedPayment === 'cod' ? 'checked' : 'unchecked'}
-                onPress={() => setSelectedPayment('cod')}
-              />
-            </View>
-            <Text style={styles.radioButtonText}>
-              Cash on delivery (kumait only)
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(3),
-              alignItems: 'center',
-            }}>
-            <View style={{marginLeft: wp(10)}}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={selectedPayment}
-                status={selectedPayment === 'tap' ? 'checked' : 'unchecked'}
-                onPress={() => setSelectedPayment('tap')}
-              />
-            </View>
-            <Text style={styles.radioButtonText}>
-              Pay by Debit/Credit card only
-            </Text>
-          </View>
-        </View>
-
-        <PaymentUI
-          amount={Number(route?.params?.total_price)?.toFixed(2)}
-          handleSubmit={handleSubmit}
-          customer={{
-            email: billing_address?.email,
-            first_name: billing_address?.first_name,
-            last_name: billing_address?.last_name,
-            phone: billing_address?.phone,
+            backgroundColor: '#ccc',
+            height: 1,
+            marginHorizontal: wp(4),
+            marginVertical: hp(1),
           }}
         />
+
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginHorizontal: wp(4),
+            paddingVertical: hp(1),
+          }}>
+          <View>
+            <Text
+              style={{
+                color: '#e7b6b5',
+                fontFamily: 'Roboto-Bold',
+                fontSize: wp(4.3),
+                marginBottom: hp(1),
+              }}>
+              Billing & Shiping Address<Text style={{color: 'red'}}>*</Text>
+            </Text>
+
+            {(shipping_address?.first_name || shipping_address?.last_name) && (
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Montserrat-Medium',
+                  fontSize: wp(4.5),
+                  textTransform: 'capitalize',
+                }}>
+                {(shipping_address?.first_name || '') +
+                  ' ' +
+                  (shipping_address?.last_name || '')}
+              </Text>
+            )}
+
+            {(shipping_address?.address_1 || shipping_address?.address_2) && (
+              <>
+                <Text
+                  style={{
+                    color: '#000',
+                    fontFamily: 'Montserrat-Light',
+                    fontSize: wp(4.2),
+                  }}>
+                  {(shipping_address?.address_1 || '') +
+                    ' ' +
+                    (shipping_address?.address_2 || '')}
+                </Text>
+
+                <Text
+                  style={{
+                    color: '#000',
+                    fontFamily: 'Montserrat-Light',
+                    fontSize: wp(4.2),
+                  }}>
+                  {(shipping_address?.city || '') +
+                    ', ' +
+                    (shipping_address?.postcode || '') +
+                    ', ' +
+                    (shipping_address?.country || '')}
+                </Text>
+              </>
+            )}
+          </View>
+
+          <Text
+            onPress={() => navigation.navigate('AddShippingAddressScreen-Cart')}
+            style={{
+              color: '#e7b6b5',
+              fontFamily: 'Montserrat-Medium',
+              fontSize: wp(4.5),
+            }}>
+            Change
+          </Text>
+        </View>
+
+        <View
+          style={{
+            backgroundColor: '#ccc',
+            height: 1,
+            marginHorizontal: wp(4),
+            marginVertical: hp(1),
+          }}
+        />
+
+        {/* SHIPING END */}
+
+        <Text
+          style={{
+            color: '#e7b6b5',
+            fontFamily: 'Roboto-Bold',
+            fontSize: wp(5),
+            marginHorizontal: wp(4),
+          }}>
+          Payment
+        </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginVertical: hp(1),
+            alignItems: 'center',
+          }}>
+          <RadioButton
+            uncheckedColor="#999"
+            color="#d68088"
+            value={selectedPayment}
+            status={selectedPayment === 'cod' ? 'checked' : 'unchecked'}
+            onPress={() => setSelectedPayment('cod')}
+          />
+          <Text style={styles.radioButtonText}>
+            Cash on delivery (kuwait only)
+          </Text>
+        </View>
+
+        <View
+          style={{
+            flexDirection: 'row',
+            marginVertical: hp(1),
+            alignItems: 'center',
+          }}>
+          <RadioButton
+            uncheckedColor="#999"
+            color="#d68088"
+            value={selectedPayment}
+            status={selectedPayment === 'tap' ? 'checked' : 'unchecked'}
+            onPress={() => setSelectedPayment('tap')}
+          />
+          <Text style={styles.radioButtonText}>
+            Pay by Debit/Credit card only
+          </Text>
+        </View>
       </ScrollView>
+      <PaymentUI
+        amount={Number(route?.params?.total_price)?.toFixed(2)}
+        handleSubmit={handleSubmit}
+        customer={{
+          email: billing_address?.email,
+          first_name: billing_address?.first_name,
+          last_name: billing_address?.last_name,
+          phone: billing_address?.phone,
+        }}
+      />
     </View>
   );
 };
@@ -605,7 +462,7 @@ export default CheckOutMighzal;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#eee',
+    backgroundColor: '#fff',
   },
   radiobuttonImage: {
     height: wp(7),

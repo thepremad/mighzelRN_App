@@ -69,11 +69,13 @@ const AddressAddNewShipping = ({navigation, route}) => {
       }
     }
 
-    if (
-      Object.keys(cartData?.shipping_address).length === 0 ||
-      Object.keys(cartData?.billing_address).length === 0
-    ) {
-      dispatch(fetchCartDataRequest());
+    if (cartData?.shipping_address) {
+      if (
+        Object.keys(cartData?.shipping_address)?.length === 0 ||
+        Object.keys(cartData?.billing_address)?.length === 0
+      ) {
+        dispatch(fetchCartDataRequest());
+      }
     }
 
     fetchCountry();
@@ -173,7 +175,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
         {
           ...inputs,
           customer_id,
-          type: selectedAddress === 1 ? 'shipping' : 'billing',
+          type: 'shipping',
         },
         true,
       );
@@ -217,56 +219,13 @@ const AddressAddNewShipping = ({navigation, route}) => {
       )}
       <Header
         navAction="back"
-        title={`Add / Edit ${
-          selectedAddress === 1 ? 'Shipping' : 'Billing'
-        } Address`}
+        title={`Add/Edit Billing Address`}
         titleStyle={{fontSize: wp(4.8), fontFamily: 'Montserrat-Regular'}}
         style={{marginBottom: hp(3)}}
       />
 
       <ScrollView contentContainerStyle={{paddingBottom: hp(3)}}>
         <View style={styles.homeContainer}>
-          <View
-            style={{
-              marginBottom: hp(2),
-              flexDirection: 'row',
-              justifyContent: 'space-around',
-              alignItems: 'center',
-              marginHorizontal: wp(4),
-            }}>
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                flex: 1,
-              }}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={selectedAddress}
-                status={selectedAddress === 1 ? 'checked' : 'unchecked'}
-                onPress={() => setSelectedAddress(1)}
-              />
-              <Text>Shipping</Text>
-            </View>
-
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                flex: 1,
-              }}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={selectedAddress}
-                status={selectedAddress === 2 ? 'checked' : 'unchecked'}
-                onPress={() => setSelectedAddress(2)}
-              />
-              <Text>Billing</Text>
-            </View>
-          </View>
-
           <TextInput
             mode="flat"
             label="First Name"
