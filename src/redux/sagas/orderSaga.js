@@ -16,6 +16,7 @@ function* fetchOrder() {
         makeRequest,
         `orders?customer_id=${customer_id}`,
       );
+
       const {Status, Message} = response;
 
       if (Status === true) {

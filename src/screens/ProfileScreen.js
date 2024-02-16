@@ -123,14 +123,6 @@ const ProfileScreen = ({navigation}) => {
           Hello, {displayName}
         </Text>
         <Text style={styles.myAccountText}>MY ACCOUNT</Text>
-        <TouchableOpacity
-          onPress={() => alert('hii')}
-          style={[styles.dasOrImageBox, {marginTop: hp(3.5)}]}>
-          <Text style={styles.dashboardText}>Dashboard</Text>
-          <AntDesign name="right" color="#999" size={wp(5)} />
-        </TouchableOpacity>
-
-        <View style={styles.lineBox} />
 
         <TouchableOpacity
           onPress={() => {
@@ -153,7 +145,7 @@ const ProfileScreen = ({navigation}) => {
         </TouchableOpacity>
         <View style={styles.lineBox} />
 
-        <TouchableOpacity style={[styles.dasOrImageBox]}>
+        {/* <TouchableOpacity style={[styles.dasOrImageBox]}>
           <Text style={styles.dashboardText}>Account Details</Text>
           <AntDesign name="right" color="#999" size={wp(5)} />
         </TouchableOpacity>
@@ -163,7 +155,7 @@ const ProfileScreen = ({navigation}) => {
           <Text style={styles.dashboardText}>Delete My Account</Text>
           <AntDesign name="right" color="#999" size={wp(5)} />
         </TouchableOpacity>
-        <View style={styles.lineBox} />
+        <View style={styles.lineBox} /> */}
 
         <TouchableHighlight
           underlayColor="#d4d4d4"

@@ -489,7 +489,7 @@ const CheckOutMighzal = ({navigation, route}) => {
         />
       </ScrollView>
       <PaymentUI
-        amount={Number(route?.params?.total_price)?.toFixed(2)}
+        amount={Number(cartData?.totals?.total_price)}
         handleSubmit={handleSubmit}
         customer={{
           email: billing_address?.email,

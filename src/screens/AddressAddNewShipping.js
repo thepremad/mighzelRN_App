@@ -46,14 +46,12 @@ const AddressAddNewShipping = ({navigation, route}) => {
   const [inputs, setInputs] = useState({
     first_name: '',
     last_name: '',
-    company: '',
+    email: '',
     address_1: '',
     address_2: '',
     city: '',
-    state: '',
     postcode: '',
     country: '',
-    email: '',
     phone: '',
   });
   const dispatch = useDispatch();
@@ -71,10 +69,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
     }
 
     if (cartData?.shipping_address) {
-      if (
-        Object.keys(cartData?.shipping_address)?.length === 0 ||
-        Object.keys(cartData?.billing_address)?.length === 0
-      ) {
+      if (Object.keys(cartData?.shipping_address)?.length === 0) {
         dispatch(fetchCartDataRequest());
       }
     }
@@ -83,25 +78,15 @@ const AddressAddNewShipping = ({navigation, route}) => {
   }, []);
 
   useEffect(() => {
-    const address =
-      selectedAddress === 1
-        ? cartData?.shipping_address
-        : cartData?.billing_address;
-
+    const address = cartData?.shipping_address;
     let obj = {};
 
-    for (let key in address) {
+    for (let key in inputs) {
       obj = {...obj, [key]: address[key] || ''};
     }
 
     setInputs(obj);
-  }, [isLoading, selectedAddress]);
-
-  useEffect(() => {
-    if (Object.keys(SelectedCountry).length !== 0) {
-      fetchState();
-    }
-  }, [SelectedCountry]);
+  }, [isLoading]);
 
   const fetchCountry = () => {
     setLoader(true);
@@ -123,26 +108,6 @@ const AddressAddNewShipping = ({navigation, route}) => {
       });
   };
 
-  const fetchState = () => {
-    makeRequest(`get_state?country_code=${SelectedCountry?.code}`)
-      .then(result => {
-        if (result) {
-          const {Status} = result;
-          if (Status === true) {
-            const {Data} = result;
-            setStateList(Data);
-          } else {
-            setStateList([]);
-          }
-        }
-        setLoader(false);
-      })
-      .catch(e => {
-        setLoader(false);
-        console.log(e);
-      });
-  };
-
   const handleInputs = (value, key) => {
     setInputs({...inputs, [key]: value});
   };
@@ -151,9 +116,6 @@ const AddressAddNewShipping = ({navigation, route}) => {
     if (openDropdown === 'country') {
       setSelectedCountry(item);
       setInputs({...inputs, country: item.name});
-    } else {
-      setSelectedState(item);
-      setInputs({...inputs, state: item.name});
     }
 
     setOpenDropdown(null);
@@ -194,8 +156,9 @@ const AddressAddNewShipping = ({navigation, route}) => {
         if (Status === true) {
           console.log('res', res);
           showSnack(Message);
+          dispatch(fetchCartDataSuccess(update));
+
           if (route.name === 'AddShippingAddressScreen-Cart') {
-            dispatch(fetchCartDataSuccess(update));
             navigation.goBack();
           }
         } else {
@@ -351,41 +314,6 @@ const AddressAddNewShipping = ({navigation, route}) => {
               <CustomDD
                 data={country}
                 openDropdown={openDropdown === 'country'}
-                setOpenDropdown={setOpenDropdown}
-                handleSelect={handleSelect}
-              />
-            )}
-          </TouchableOpacity>
-          <View style={[styles.lineBox]} />
-
-          <TouchableOpacity
-            // disabled={Object.keys(SelectedCountry).length === 0}
-            onPress={() => setOpenDropdown('state')}
-            style={[styles.selecCityBox]}>
-            <Text
-              style={{
-                fontSize: wp(4),
-                color: '#4F4848',
-                // Object.keys(SelectedCountry).length === 0
-                //   ? '#ddd'
-                //   : '#4F4848',
-                textTransform: 'capitalize',
-              }}>
-              {inputs.state || 'Select State/Province/Region'}
-            </Text>
-            <AntDesign
-              name="down"
-              color={
-                '#4F4848'
-                // Object.keys(SelectedCountry).length === 0 ? '#ddd' : '#4F4848'
-              }
-              size={wp(5)}
-            />
-
-            {openDropdown === 'state' && (
-              <CustomDD
-                data={stateList}
-                openDropdown={openDropdown === 'state'}
                 setOpenDropdown={setOpenDropdown}
                 handleSelect={handleSelect}
               />

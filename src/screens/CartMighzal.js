@@ -648,7 +648,7 @@ const CartMighzal = ({navigation}) => {
                   </Text>
                   <Text
                     style={{fontFamily: 'Montserrat-Medium', color: 'black'}}>
-                    {(Number(cartData?.totals?.total_price) || 0)?.toFixed(2)}{' '}
+                    {(Number(cartData?.totals?.total_items) || 0)?.toFixed(2)}{' '}
                     KWD
                   </Text>
                 </View>

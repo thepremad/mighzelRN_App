@@ -25,7 +25,7 @@ const ProcessingScreen = ({navigation}) => {
     return () => clearTimeout(timeOutID);
   }, []);
 
-  const data = orderData.filter(item => item?.status === 'pending');
+  const data = orderData.filter(item => item?.status === 'processing');
   const ItemView = ({item}) => {
     return (
       <RectButton
