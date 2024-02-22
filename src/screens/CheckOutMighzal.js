@@ -252,17 +252,50 @@ const CheckOutMighzal = ({navigation, route}) => {
                 justifyContent: 'space-between',
                 marginTop: hp(1),
               }}>
-              <Text>{item?.product_name}</Text>
-              <Text>{item?.total}.00 KWD</Text>
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Roboto-Regular',
+                }}>
+                {item?.product_name}
+              </Text>
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Roboto-Regular',
+                }}>
+                {item?.total} KWD
+              </Text>
             </View>
           ))}
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginTop: hp(1),
+            }}>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Medium',
+              }}>
+              Discount
+            </Text>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Regular',
+              }}>
+              -{cartData?.totals?.total_discount} KWD
+            </Text>
+          </View>
 
           <View
             style={{
               backgroundColor: '#ccc',
               height: 1,
               marginVertical: hp(1),
-              marginTop: hp(2),
             }}
           />
 
@@ -278,7 +311,7 @@ const CheckOutMighzal = ({navigation, route}) => {
               }}>
               Shipping :
             </Text>
-            <Text>{cartData?.totals?.total_shipping}.00 KWD</Text>
+            <Text>{cartData?.totals?.total_shipping} KWD</Text>
           </View>
 
           <View
@@ -298,7 +331,7 @@ const CheckOutMighzal = ({navigation, route}) => {
               style={{
                 marginTop: hp(1),
               }}>
-              {cartData?.totals?.total_price}.00 KWD
+              {cartData?.totals?.total_price} KWD
             </Text>
           </View>
         </View>

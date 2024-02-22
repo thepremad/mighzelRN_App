@@ -60,25 +60,6 @@ const CartMighzal = ({navigation}) => {
   console.log('cart', {cartData, isLoading, error});
 
   useEffect(() => {
-    if (!isFocus) {
-      setCouponCode('');
-
-      const {total_price, total_discount} = cartData?.totals;
-
-      const dataToSave = {
-        ...cartData,
-        totals: {
-          ...cartData.totals,
-          total_price: Number(total_price) + Number(total_discount),
-          total_discount: 0,
-        },
-      };
-
-      dispatch(fetchCartDataSuccess(dataToSave));
-    }
-  }, [isFocus, dispatch]);
-
-  useEffect(() => {
     dispatch(fetchCartDataRequest());
   }, [dispatch]);
 
@@ -542,11 +523,12 @@ const CartMighzal = ({navigation}) => {
             }>
             <View style={{marginBottom: hp(2)}}>
               <TextInput
+                editable={cartData?.coupons.length === 0}
                 placeholder="Enter Promo code"
                 placeholderTextColor="rgba(0,0,0,0.5)"
                 style={styles.promoCodeInput}
                 onChangeText={text => setCouponCode(text)}
-                value={couponCode}
+                value={couponCode || cartData?.coupons[0]?.code}
                 onFocus={onCouponFocus}
               />
 
