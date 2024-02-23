@@ -59,19 +59,19 @@ const paymentReference = {
 };
 
 const allConfigurations = (totalAmount, customer_detail) => {
-  console.log(totalAmount);
   const appCredentials = {
-    // production_secrete_key:
-    //   Platform.OS === 'ios'
-    //     ? 'iOS-Live-KEY'
-    //     : 'sk_live_ZwpjAmBd3Hf1zS7EiCP9rx8g',
+    production_secrete_key:
+      Platform.OS === 'ios'
+        ? 'sk_live_ZwpjAmBd3Hf1zS7EiCP9rx8g'
+        : 'sk_live_ZwpjAmBd3Hf1zS7EiCP9rx8g',
     language: Languages.EN,
     sandbox_secrete_key:
       Platform.OS === 'ios'
         ? 'sk_test_XKokBfNWv6FIYuTMg5sLPjhJ'
         : 'sk_test_L4y8obVBrTICKMDFxqEQS6R7',
     // : 'sk_test_L4y8obVBrTICKMDFxqEQS6R7',
-    bundleID: Platform.OS === 'ios' ? 'iOS-PACKAGE-NAME' : 'com.mighzal',
+    bundleID:
+      Platform.OS === 'ios' ? 'com.mighzalalarab.wpEcommerce' : 'com.mighzal',
   };
 
   const transactionCurrency = 'kwd';

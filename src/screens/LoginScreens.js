@@ -26,6 +26,7 @@ import {showSnack} from '../components/Snackbar';
 import {useDispatch} from 'react-redux';
 import {setMainRoute} from '../redux/action/routeActions';
 import PaymentUI from '../payment_gateway/PaymentUI';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 // import RNGoSell from '@tap-payments/gosell-sdk-react-native';
 // import sdkConfigurations from '../payment_gateway/sdkConfigurations';
@@ -246,7 +247,12 @@ const LoginScreens = ({navigation, route}) => {
           left={
             <TextInput.Icon
               icon={({}) => (
-                <Icon source="email-outline" color="#d68088" size={wp(5)} />
+                // <Icon source="email-outline" color="#d68088" size={wp(5)} />
+                <MaterialCommunityIcons
+                  name="email-outline"
+                  color="#d68088"
+                  size={wp(5)}
+                />
               )}
             />
           }
