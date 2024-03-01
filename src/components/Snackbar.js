@@ -27,5 +27,6 @@ export const showSnack = (message, action, err) => {
     message,
     type: !err ? 'success' : 'danger',
     position: 'top',
+    icon: 'auto',
   });
 };

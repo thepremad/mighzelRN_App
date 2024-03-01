@@ -41,7 +41,9 @@ const Footer = ({navigation, state}) => {
       <TouchableOpacity
         style={{padding: 6}}
         activeOpacity={1}
-        onPress={() => navigation.navigate('Category')}>
+        onPress={() =>
+          navigation.navigate('Category', {screen: 'CategoryScreen'})
+        }>
         <Ionicons
           name="grid-outline"
           size={wp(5.5)}
@@ -52,21 +54,23 @@ const Footer = ({navigation, state}) => {
       <TouchableOpacity
         style={{padding: 6}}
         activeOpacity={1}
-        onPress={() => navigation.navigate('Cart')}>
+        onPress={() => navigation.navigate('Cart', {screen: 'CartScreen'})}>
         <SimpleLineIcons
           name="handbag"
           size={wp(5)}
           color={index === 2 ? '#fff' : '#000'}
         />
         <Badge style={{top: -4, position: 'absolute', right: -8}}>
-          {cartData?.length}
+          {cartData?.items_count}
         </Badge>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={{padding: 6}}
         activeOpacity={1}
-        onPress={() => navigation.navigate('Profile')}>
+        onPress={() =>
+          navigation.navigate('Profile', {screen: 'ProfileScreen'})
+        }>
         <Feather
           name="user"
           size={wp(6)}

@@ -18,13 +18,7 @@ import CancelledScreen from '../components/CancelledScreen';
 import DeliveredScreen from '../components/DeliveredScreen';
 import Header from '../components/Header';
 
-// API Info
-// import {BASE_URL} from '../api/ApiInfo';
-
-// User Preference
-// import {async_keys, getData} from '../storage/UserPreference';
-
-export default class OrderTabScreen extends Component {
+class OrderTabScreen extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -48,8 +42,7 @@ export default class OrderTabScreen extends Component {
     };
 
     // configuring TabView
-    const window = Dimensions.get('window');
-    const {width} = window;
+    const {width} = Dimensions.get('window');
     this.initialLayout = {width};
 
     // SceneMap Routing
@@ -101,11 +94,12 @@ export default class OrderTabScreen extends Component {
   );
 
   render() {
+    // console.log('this.props.orderData', this.props.orderData);
     const {state, sceneMap, handleTabIndexChange, initialLayout} = this;
     const {tabView} = state;
 
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <Header
           title="My Order"
           titleStyle={{fontSize: wp(4.2)}}
@@ -121,10 +115,20 @@ export default class OrderTabScreen extends Component {
             renderTabBar={this.renderTabBar}
           />
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 }
+
+const mapStateToProps = state => ({
+  // orderData: state.order.orderData,
+});
+
+const mapDispatchToProps = {
+  // fetchOrderDataRequest,
+};
+
+export default OrderTabScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -141,7 +145,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   tabBarLabel: {
-    fontWeight: '700',
+    fontFamily: 'Montserrat-SemiBold',
     fontSize: wp(3),
     color: '#000',
   },
@@ -154,15 +158,14 @@ const styles = StyleSheet.create({
   activeTabTextColor: {
     fontSize: wp(4),
     color: '#000',
-    fontFamily: 'Roboto-Medium',
+    fontFamily: 'Montserrat-Medium',
   },
   tabTextColor: {
     fontSize: wp(4),
     color: '#999',
-    fontFamily: 'Roboto-Regular',
+    fontFamily: 'Montserrat-Medium',
   },
   internalTabStyle: {
-    // width: 'auto',
-    width: wp(33.33),
+    width: wp(33.29),
   },
 });

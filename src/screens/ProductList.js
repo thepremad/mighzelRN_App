@@ -27,6 +27,8 @@ const ProductList = ({navigation, route}) => {
     }
   }, []);
 
+  const handleSearch = () => navigation.navigate('SearchScreen-Home');
+
   const fetchProducts = async id => {
     try {
       setLoader(true);
@@ -35,7 +37,7 @@ const ProductList = ({navigation, route}) => {
         const {Status} = result;
         if (Status === true) {
           const {Data} = result;
-          setData(Data.map(item => ({...item, imageLoading: true})));
+          setData(Data.items || []);
           setLoader(false);
         } else {
           setLoader(false);
@@ -58,6 +60,7 @@ const ProductList = ({navigation, route}) => {
         title={categoryDetails?.category_name}
         titleStyle={{color: '#d68088'}}
         search
+        handleSearch={handleSearch}
       />
 
       {loader ? (
@@ -68,14 +71,11 @@ const ProductList = ({navigation, route}) => {
           keyExtractor={i => i?.product_id?.toString()}
           data={data}
           renderItem={({item, index}) => (
-            <RenderProducts
-              item={item}
-              index={index}
-              loader={loader}
-              setData={setData}
-              data={data}
-            />
+            <RenderProducts item={item} index={index} loader={loader} />
           )}
+          initialNumToRender={4}
+          maxToRenderPerBatch={6}
+          windowSize={6}
         />
       )}
     </View>

@@ -31,7 +31,7 @@ const Address = ({navigation}) => {
       <Header
         navAction="back"
         title="Shipping Address"
-        titleStyle={{fontSize: wp(4.8), fontWeight: '400'}}
+        titleStyle={{fontSize: wp(4.8), fontFamily: 'Montserrat-Regular'}}
       />
 
       <View style={styles.homeContainer}>
@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   InformationText: {
     fontSize: wp(5),
     color: '#000',
-    fontWeight: '400',
+    fontFamily: 'Montserrat-Regular',
     marginLeft: wp(4),
   },
   righArrowImage: {

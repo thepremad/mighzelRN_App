@@ -6,6 +6,7 @@ import {
   KeyboardAvoidingView,
   StyleSheet,
   Text,
+  TouchableHighlight,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -16,14 +17,18 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import {TextInput} from 'react-native-paper';
+import {ActivityIndicator, TextInput} from 'react-native-paper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import Fontisto from 'react-native-vector-icons/Fontisto';
 import Entypo from 'react-native-vector-icons/Entypo';
+import {makeRequest} from '../api/ApiInfo';
+import {showSnack} from '../components/Snackbar';
 
-const SearchScreen = ({navigation}) => {
+const SearchScreen = ({navigation, route}) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [loader, setLoader] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [searchList, setSearchList] = useState([]);
 
   const handleFocus = () => {
     setIsFocused(true);
@@ -32,15 +37,65 @@ const SearchScreen = ({navigation}) => {
   const handleBlur = () => {
     setIsFocused(false);
   };
-  const handleSearch = text => setSearchText(text);
+  const handleSearch = async text => {
+    try {
+      setSearchText(text);
+      if (text.length > 2) {
+        setLoader(true);
+        const result = await makeRequest(`search_products?name=${text}`);
+        const {Status, Message} = result;
+        if (Status === true) {
+          const {Data} = result;
+          setSearchList(Data);
+          setLoader(false);
+        } else {
+          showSnack(Message, null, true);
+        }
+      } else {
+        setSearchList([]);
+      }
+    } catch (error) {
+      showSnack(
+        `Oops, something went wrong please try again later!`,
+        null,
+        true,
+      );
+      console.log(error);
+    }
+  };
   const handleClear = () => {
     setSearchText('');
   };
 
+  const handleSearchedProduct = product_id => {
+    console.log('route.name', route.name);
+    if (route.name === 'SearchScreen-Category') {
+      navigation.navigate('ProductDetails-Category', {product_id});
+    } else if (route.name === 'SearchScreen-Home') {
+      navigation.navigate('ProductDetails-Home', {product_id});
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {loader && (
+        <View
+          style={{
+            position: 'absolute',
+            height: hp(100),
+            width: wp(100),
+            zIndex: 99,
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,.5)',
+          }}>
+          <ActivityIndicator color="#d68088" size={'large'} />
+        </View>
+      )}
       <View style={styles.headerContainer}>
-        <TouchableOpacity activeOpacity={1} onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          style={{padding: wp(1.5)}}
+          activeOpacity={1}
+          onPress={() => navigation.goBack()}>
           <AntDesign name="arrowleft" color="#d68088" size={wp(5)} />
         </TouchableOpacity>
       </View>
@@ -93,21 +148,23 @@ const SearchScreen = ({navigation}) => {
           style={{flex: 1}}
           behavior={'height'}>
           <FlatList
-            data={[
-              1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-              20, 21, 22, 23, 24, 25,
-            ]}
+            data={searchList}
             renderItem={({item}) => (
-              <Text
-                style={{
-                  fontWeight: '300',
-                  marginVertical: hp(1),
-                  marginHorizontal: wp(4),
-                }}>
-                {item}
-              </Text>
+              <TouchableHighlight
+                underlayColor="#eee"
+                onPress={() => handleSearchedProduct(item.product_id)}>
+                <Text
+                  style={{
+                    fontFamily: 'Montserrat-Light',
+                    paddingVertical: hp(1),
+                    paddingHorizontal: wp(4),
+                  }}>
+                  {item.product_name}
+                </Text>
+              </TouchableHighlight>
             )}
-            keyExtractor={item => item.toString()}
+            keyExtractor={item => item.product_id?.toString()}
+            keyboardShouldPersistTaps="handled"
             ItemSeparatorComponent={() => (
               <View style={{borderBottomWidth: 0.5, borderColor: '#000'}} />
             )}
@@ -127,6 +184,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     justifyContent: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: wp(4),
     paddingVertical: hp(1),
     paddingTop: hp(2),

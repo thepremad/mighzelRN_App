@@ -23,15 +23,23 @@ import {makeRequest} from '../api/ApiInfo';
 import {ActivityIndicator} from 'react-native-paper';
 
 import CategoryShimmer from '../shimmers/CategoryShimmer';
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
+import FastImage from 'react-native-fast-image';
 
 const Categories = props => {
   const [categoryData, setCategoryData] = useState([]);
   const [loader, setLoader] = useState(true);
+  const [bannerlLoader, setBannerLoader] = useState(true);
   useEffect(() => {
-    fetchCtegories();
+    fetchCategories();
+    const timeOutID = setTimeout(() => setBannerLoader(false), 1000);
+
+    return () => clearTimeout(timeOutID);
   }, []);
 
-  const fetchCtegories = async () => {
+  console.log('categoryData-->', categoryData);
+
+  const fetchCategories = async () => {
     try {
       setLoader(true);
       const result = await makeRequest(`categories`);
@@ -82,18 +90,18 @@ const Categories = props => {
           marginLeft: wp(5),
           fontSize: wp(4.5),
           color: '#000000',
-          fontWeight: '300',
+          fontFamily: 'Montserrat-Light',
         }}>
         {item?.category_name}
       </Text>
-      <Image
-        source={
-          loader
-            ? require('../assets/images/product_placeholder_image.png')
-            : {uri: item?.image}
-        }
+
+      <FastImage
+        source={{
+          uri: item?.image,
+          priority: FastImage.priority.high,
+          cache: FastImage.cacheControl.immutable,
+        }}
         defaultSource={require('../assets/images/product_placeholder_image.png')}
-        // resizeMode="contain"
         style={{height: hp(17), width: hp(17)}}
       />
     </TouchableOpacity>
@@ -135,14 +143,27 @@ const Categories = props => {
         style={{
           marginHorizontal: wp(3),
           marginVertical: hp(2),
-          fontSize: wp(5),
+          fontSize: wp(5.5),
           color: 'black',
+          fontFamily: 'Montserrat-SemiBold',
         }}>
         Category
       </Text>
 
+      {loader && !bannerlLoader && listHeaderComponent()}
+
       {loader ? (
-        <CategoryShimmer />
+        <CategoryShimmer>
+          {bannerlLoader && (
+            <SkeletonPlaceholder borderRadius={4}>
+              <SkeletonPlaceholder.Item
+                height={hp(16)}
+                borderRadius={wp(3)}
+                marginHorizontal={wp(3)}
+              />
+            </SkeletonPlaceholder>
+          )}
+        </CategoryShimmer>
       ) : (
         <FlatList
           data={categoryData}

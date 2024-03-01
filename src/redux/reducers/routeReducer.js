@@ -1,7 +1,7 @@
 import {SET_MAIN_ROUTE} from '../action/ActionTypes';
 
 const initialUserState = {
-  mainRoute: 0,
+  mainRoute: 'Splash',
 };
 
 const routeReducer = (state = initialUserState, action) => {

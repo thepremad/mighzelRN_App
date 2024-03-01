@@ -16,22 +16,41 @@ import FastImage from 'react-native-fast-image';
 import {useDispatch} from 'react-redux';
 import {useNavigation, useRoute} from '@react-navigation/native';
 
-const RenderProducts = ({item, index, home, setData, data}) => {
+const RenderProducts = ({item, index, home, handleRelatedProd}) => {
   // const [imageLoading, setImageLoading] = useState([]);
   const dispatch = useDispatch();
-  console.log('<RenderProducts />');
   const navigation = useNavigation();
   const route = useRoute();
 
+  console.log('item', route?.name, item);
+
   const handleProductDetails = useCallback(
     product_id => {
+      // switch (route.name) {
+      //   case 'ProductList-Category':
+      //     navigation.navigate('ProductDetails-Category', {product_id});
+      //     break;
+
+      //   case 'HomeScreen' || 'ProductList-Home':
+      //     navigation.navigate('ProductDetails-Home', {product_id});
+      //     break;
+
+      //   case 'ProductDetails-Home' || 'ProductDetails-Category':
+      //     handleRelatedProd(product_id);
+      // }
+
       if (route.name === 'ProductList-Category') {
         navigation.navigate('ProductDetails-Category', {product_id});
       } else if (
-        route.name === 'ProductDetails-Home' ||
-        route.name === 'HomeScreen'
+        route.name === 'HomeScreen' ||
+        route.name === 'ProductList-Home'
       ) {
         navigation.navigate('ProductDetails-Home', {product_id});
+      } else if (
+        route.name === 'ProductDetails-Home' ||
+        route.name === 'ProductDetails-Category'
+      ) {
+        handleRelatedProd(product_id);
       }
     },
     [route, navigation],
@@ -40,32 +59,15 @@ const RenderProducts = ({item, index, home, setData, data}) => {
   return (
     <TouchableOpacity
       onPress={() => handleProductDetails(item.product_id)}
-      activeOpacity={1}
+      activeOpacity={0.9}
       style={styles.container}>
       <FastImage
-        // onLoadEnd={() => handleLoadEnd(item.item?.product_id)}
-        onLoadEnd={() => {
-          if (setData) {
-            setData(
-              data.map(i => {
-                if (i.product_id === item.product_id) {
-                  return {...item, imageLoading: false};
-                }
-                return i;
-              }),
-            );
-          }
-        }}
         style={styles.image}
-        source={
-          item.imageLoading
-            ? require('../assets/images/product_placeholder_image.png')
-            : {
-                uri: item?.images[0],
-                priority: FastImage.priority.normal,
-                cache: FastImage.cacheControl.immutable,
-              }
-        }
+        source={{
+          uri: item?.images[0],
+          priority: FastImage.priority.high,
+          cache: FastImage.cacheControl.immutable,
+        }}
         defaultSource={require('../assets/images/product_placeholder_image.png')}
         resizeMode={FastImage.resizeMode.stretch}
       />
@@ -106,7 +108,7 @@ const RenderProducts = ({item, index, home, setData, data}) => {
 // const hh = '<del><span class=\"woocommerce-Price-amount amount\"><bdi>20.00&nbsp;<span class=\"woocommerce-Price-currencySymbol\">KWD</span></bdi></span></del>
 // <ins><span class=\"woocommerce-Price-amount amount\"><bdi>14.00&nbsp;<span class=\"woocommerce-Price-currencySymbol\">KWD</span></bdi></span></ins>'
 
-export default RenderProducts;
+export default memo(RenderProducts);
 
 const styles = StyleSheet.create({
   container: {
@@ -116,13 +118,14 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: hp(18),
+    aspectRatio: 1 / 1,
+    // height: hp(21),
   },
   nameText: {
-    fontSize: wp(3.8),
-    color: '#000',
-    fontWeight: '300',
-    textTransform: 'capitalize',
+    fontSize: wp(3.5),
+    color: '#c6930a',
+    fontFamily: 'Montserrat-Medium',
+    textTransform: 'uppercase',
     marginRight: wp(1.9),
   },
   mrpText: {
@@ -134,5 +137,6 @@ const styles = StyleSheet.create({
   priceText: {
     color: '#d68088',
     fontSize: wp(3),
+    fontFamily: 'Montserrat-Regular',
   },
 });

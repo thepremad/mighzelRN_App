@@ -26,13 +26,11 @@ import {isValidEmail} from '../authentication/auth';
 import {ActivityIndicator, Button, Icon, Snackbar} from 'react-native-paper';
 import CustomSnack from '../components/CustomSnack';
 import {makeRequest} from '../api/ApiInfo';
+import {showSnack} from '../components/Snackbar';
 
 const SignUp = ({navigation}) => {
   //using state
-  const [visible, setVisible] = useState(false);
-  const [error, setError] = useState(false);
   const [loader, setLoader] = useState(false);
-  const [snackText, setSnackText] = useState('');
   const [inputs, setInputs] = useState({
     fullName: '',
     email: '',
@@ -48,23 +46,18 @@ const SignUp = ({navigation}) => {
 
     //VALIDATION
     if (fullName.trim() === '' || fullName.length < 3) {
-      setSnackText('Full name should be minimum 3 character long!');
-      setVisible(true);
-      setError(true);
+      showSnack('Full name should be minimum 3 character long!', null, true);
+
       return true;
     }
 
     if (!isValidEmail(email)) {
-      setSnackText('Please enter valid email!');
-      setVisible(true);
-      setError(true);
+      showSnack('Please enter valid email!', null, true);
       return true;
     }
 
     if (password.trim() === '' || fullName.length < 3) {
-      setSnackText('Password should be minimum 3 character long!');
-      setVisible(true);
-      setError(true);
+      showSnack('Password should be minimum 3 character long!', null, true);
       return true;
     }
 
@@ -84,20 +77,16 @@ const SignUp = ({navigation}) => {
         setLoader(false);
         const {Status, Message} = result;
         if (Status === true) {
-          setSnackText(Message);
-          setVisible(true);
-          setError(false);
+          showSnack(Message);
           setInputs({
             fullName: '',
             email: '',
             password: '',
           });
 
-          navigation.navigate('Login');
+          navigation.navigate('LoginScreen');
         } else {
-          setSnackText(Message);
-          setVisible(true);
-          setError(true);
+          showSnack(Message, null, true);
         }
       }
     } catch (error) {
@@ -107,12 +96,6 @@ const SignUp = ({navigation}) => {
 
   return (
     <View style={styles.container}>
-      <CustomSnack
-        visible={visible}
-        setVisible={setVisible}
-        snackText={snackText}
-        error={error}
-      />
       {loader && (
         <View
           style={{
@@ -150,8 +133,12 @@ const SignUp = ({navigation}) => {
 
         <Text style={styles.nameText}>Email</Text>
         <View style={[styles.emailTextInputBox, {marginTop: hp(2)}]}>
-          <Image source={ic_email1} style={{height: hp(3), width: wp(6)}} />
+          <Image
+            source={ic_email1}
+            style={{width: wp(6), aspectRatio: 1 / 1}}
+          />
           <TextInput
+            inputMode="email"
             placeholder="Enter Email "
             placeholderTextColor={'#7a7a7a'}
             style={styles.emailTextInput}
@@ -187,7 +174,7 @@ const SignUp = ({navigation}) => {
         />
 
         <Text
-          onPress={() => navigation.navigate('Login')}
+          onPress={() => navigation.navigate('LoginScreen')}
           style={styles.alreadyRegisterText}>
           Already register? Login
         </Text>
@@ -212,7 +199,7 @@ const styles = StyleSheet.create({
   registerText: {
     fontSize: wp(7),
     color: '#000',
-    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
     alignSelf: 'center',
     marginTop: hp(10),
   },
@@ -220,7 +207,7 @@ const styles = StyleSheet.create({
   nameText: {
     fontSize: wp(5),
     color: '#000',
-    fontWeight: '400',
+    fontFamily: 'Montserrat-Regular',
     marginTop: hp(2),
     marginLeft: wp(2),
   },
@@ -238,7 +225,7 @@ const styles = StyleSheet.create({
   alreadyRegisterText: {
     fontSize: wp(4),
     color: '#000',
-    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
     textAlign: 'right',
     marginRight: wp(4),
     marginTop: hp(1.5),
@@ -256,7 +243,7 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#fff',
     paddingVertical: hp(2),
-    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
   },
 
   lastBox: {

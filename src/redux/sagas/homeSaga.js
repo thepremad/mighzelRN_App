@@ -13,17 +13,11 @@ import {
   fetchHomeDataThirdFailure,
   fetchHomeDataThirdSuccess,
 } from '../action/homeActions';
-import {async_keys, getData} from '../../storage/UserPreference';
 import {showSnack} from '../../components/Snackbar';
 import {BASE_URL, makeRequest} from '../../api/ApiInfo';
 
 function* fetchHomeFirst() {
   try {
-    const requestOptions = {
-      method: 'GET',
-      redirect: 'follow',
-    };
-
     const response = yield call(makeRequest, `home_details_1`);
 
     const {Status, Message} = response;
@@ -32,7 +26,7 @@ function* fetchHomeFirst() {
       const {Data} = response;
 
       yield put(fetchHomeDataFirstSuccess(Data));
-      yield put({type: FETCH_HOME_DATA_REQUEST_2});
+      // yield put({type: FETCH_HOME_DATA_REQUEST_2});
     } else {
       yield call(showSnack, Message, null, true);
       yield put(fetchHomeDataFirstFailure(Message));

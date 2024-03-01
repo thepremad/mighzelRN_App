@@ -8,6 +8,8 @@ export const async_keys = {
   user_display_name: 'user_display_name',
 
   cart_data: 'cart_data',
+
+  customer_id: 'customer_id',
 };
 
 // User Preferences Methods

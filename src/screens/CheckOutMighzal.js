@@ -10,283 +10,527 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   heightPercentageToDP as hp,
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 
-import {RadioButton} from 'react-native-paper';
+import {ActivityIndicator, RadioButton} from 'react-native-paper';
 import {RectButton} from 'react-native-gesture-handler';
+import Header from '../components/Header';
+import {useDispatch, useSelector} from 'react-redux';
+import {async_keys, getData} from '../storage/UserPreference';
+import {showSnack} from '../components/Snackbar';
+import {makeRequest} from '../api/ApiInfo';
+import {fetchCartDataSuccess} from '../redux/action/cartActions';
+import PaymentUI from '../payment_gateway/PaymentUI';
+import {fetchUserDataRequest} from '../redux/action/userActions';
+import {CheckBox, Icon} from '@rneui/themed';
 
-const CheckOutMighzal = () => {
-  const [selected, setSelected] = useState('');
-  const [select, setSelect] = useState('');
+const CheckOutMighzal = ({navigation, route}) => {
+  const [selectedPayment, setSelectedPayment] = useState('');
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [loader, setLoader] = useState(false);
 
-  const button1 = () => {
-    setSelected('cash');
+  const dispatch = useDispatch();
+  const {cartData, error} = useSelector(state => state.cart);
+  const {billing_address, shipping_address} = cartData;
+
+  // console.log('cart-checkout', cartData);
+  // const {userData, isLoading} = useSelector(state => state.user);
+
+  // useEffect(() => {
+  //   dispatch(fetchUserDataRequest());
+  // }, [dispatch]);
+
+  const handleSubmit = async startPayment => {
+    try {
+      if (selectedAddress !== 2) {
+        if (Object.keys(shipping_address).length === 0) {
+          showSnack('Please add billing address', null, true);
+          return true;
+        }
+      }
+
+      if (selectedAddress !== 1) {
+        if (Object.keys(billing_address).length === 0) {
+          showSnack('Please add shipping address', null, true);
+          return true;
+        }
+      }
+
+      if (!selectedPayment) {
+        showSnack('Please select payment option', null, true);
+        return true;
+      }
+
+      if (selectedPayment === 'cod') {
+        createOrder();
+      } else {
+        startPayment(createOrder, setLoader);
+      }
+    } catch (error) {
+      setLoader(false);
+      console.log(error);
+    }
   };
-  const button2 = () => {
-    setSelected('pay');
-  };
 
-  const button3 = () => {
-    setSelect('null');
+  const createOrder = async paymentStatus => {
+    console.log('paymentStatus', paymentStatus);
+    // OUTPUT IS:-
+
+    // KNET PAYMENT STATUS : {
+    //   status: 'CAPTURED',
+    //   id: 'chg_TS07A2720231108g6L70412970',
+    //   source_object: 'source',
+    //   customer_email: 'test@test.com',
+    //   sdk_result: 'SUCCESS',
+    //   charge_id: 'chg_TS07A2720231108g6L70412970',
+    //   source_payment_type: 'DEBIT',
+    //   customer_last_name: 'test',
+    //   customer_middle_name: null,
+    //   message: 'Captured',
+    //   trx_mode: 'CHARGE',
+    //   source_channel: 'INTERNET',
+    //   customer_id: 'cus_TS06A2820231108Kk4t0412470',
+    //   description: 'paymentStatementDescriptor',
+    //   source_id: 'src_kw.knet',
+    //   customer_first_name: 'test',
+    // };
+
+    // CARD PAYMENT STATUS : {
+    //   customer_id: 'cus_TS06A2120230849Yo6x0512044',
+    //   acquirer_id: null,
+    //   source_object: 'token',
+    //   customer_email: 'test@test.com',
+    //   card_object: 'card',
+    //   source_channel: 'INTERNET',
+    //   customer_middle_name: null,
+    //   charge_id: 'chg_TS01A2020230849o1M40512193',
+    //   source_id: 'tok_O3qx14235495ucd5UK112696',
+    //   source_payment_type: 'CREDIT',
+    //   customer_first_name: 'test',
+    //   acquirer_response_message: 'Approved',
+    //   card_first_six: '512345',
+    //   id: 'chg_TS01A2020230849o1M40512193',
+    //   card_last_four: '0008',
+    //   sdk_result: 'SUCCESS',
+    //   message: 'Captured',
+    //   acquirer_response_code: '00',
+    //   status: 'CAPTURED',
+    //   customer_last_name: 'test',
+    //   card_exp_year: null,
+    //   card_exp_month: null,
+    //   trx_mode: 'CHARGE',
+    //   card_brand: 'MASTERCARD',
+    //   description: 'testDescriptor.',
+    // };
+
+    try {
+      setLoader(true);
+
+      const token = await getData(async_keys.auth_token);
+      const customer_id = await getData(async_keys.customer_id);
+      const coupon_code = route?.params?.couponCode || '';
+
+      const update = {
+        ...cartData,
+        items: [],
+        coupons: [],
+        fees: [],
+        totals: {
+          total_price: 0,
+          total_discount: 0,
+        },
+        items_count: 0,
+      };
+
+      const params = {
+        token,
+        customer_id,
+        payment_method: selectedPayment || '',
+      };
+
+      if (selectedAddress !== null) {
+        const key =
+          selectedAddress === 1 ? 'shipping_as_billing' : 'billing_as_shipping';
+
+        params[key] = 'yes';
+      }
+
+      if (coupon_code) {
+        params.coupon_code = coupon_code;
+      }
+
+      if (selectedPayment === 'cod') {
+        const res = await makeRequest('create_order', params, true);
+
+        if (res) {
+          const {Status, Message} = res;
+          if (Status === true) {
+            showSnack(Message);
+            dispatch(fetchCartDataSuccess(update));
+            setLoader(false);
+            const {billing, order_number} = res.Data;
+            navigation.navigate('OrderSuccess', {
+              billing,
+              order_number,
+            });
+          } else {
+            setLoader(false);
+          }
+        }
+      } else if (
+        selectedPayment === 'tap' &&
+        paymentStatus &&
+        paymentStatus.sdk_result === 'SUCCESS'
+      ) {
+        params.transaction_id = paymentStatus?.id;
+
+        const res = await makeRequest('create_order', params, true);
+        if (res) {
+          const {Status, Message} = res;
+          if (Status === true) {
+            showSnack(Message);
+            dispatch(fetchCartDataSuccess(update));
+            setLoader(false);
+            const {billing, order_number} = res.Data;
+            navigation.navigate('OrderSuccess', {
+              billing,
+              order_number,
+              trx_ID: paymentStatus?.id,
+            });
+          } else {
+            setLoader(false);
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
     <View style={styles.container}>
+      <Header title="Checkout" navAction="back" />
+      {loader && (
+        <View
+          style={{
+            position: 'absolute',
+            zIndex: 99,
+            height: hp(100),
+            width: wp(100),
+            justifyContent: 'center',
+          }}>
+          <ActivityIndicator size="large" color="#D68088" />
+        </View>
+      )}
+
       <ScrollView style={{margin: hp(0.8)}}>
         <Text
           style={{
-            color: '#000000',
-            fontWeight: '500',
-            margin: hp(1),
-            fontSize: wp(4.5),
+            color: '#e7b6b5',
+            fontFamily: 'Roboto-Bold',
+            fontSize: wp(4.3),
+            marginHorizontal: wp(4),
           }}>
-          Additional Information
+          Order Details:
         </Text>
-
-        <Text
+        <View
           style={{
-            color: '#000000',
-            fontWeight: '300',
-            marginHorizontal: hp(1),
-            marginBottom: hp(0.5),
-            marginTop: hp(1.5),
+            marginVertical: hp(1),
+            backgroundColor: '#eee',
+            marginHorizontal: wp(4),
+            padding: hp(1.5),
           }}>
-          ADD A NOTE TO YOUR ORDER (OPTIONAL)
-        </Text>
+          {(cartData?.items || [])?.map(item => (
+            <View
+              key={item?.product_id?.toString()}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginTop: hp(1),
+              }}>
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Roboto-Regular',
+                }}>
+                {item?.product_name}
+              </Text>
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Roboto-Regular',
+                }}>
+                {item?.total} KWD
+              </Text>
+            </View>
+          ))}
 
-        <TextInput
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              marginTop: hp(1),
+            }}>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Medium',
+              }}>
+              Discount
+            </Text>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Regular',
+              }}>
+              -{cartData?.totals?.total_discount} KWD
+            </Text>
+          </View>
+
+          <View
+            style={{
+              backgroundColor: '#ccc',
+              height: 1,
+              marginVertical: hp(1),
+            }}
+          />
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Medium',
+              }}>
+              Shipping :
+            </Text>
+            <Text>{cartData?.totals?.total_shipping} KWD</Text>
+          </View>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+            }}>
+            <Text
+              style={{
+                color: '#000',
+                fontFamily: 'Roboto-Medium',
+                marginTop: hp(1),
+              }}>
+              Total :
+            </Text>
+            <Text
+              style={{
+                marginTop: hp(1),
+              }}>
+              {cartData?.totals?.total_price} KWD
+            </Text>
+          </View>
+        </View>
+
+        {/* SHIPING START */}
+
+        <View
           style={{
-            backgroundColor: '#ffffff',
-            paddingVertical: hp(0.5),
-            elevation: 3,
+            backgroundColor: '#ccc',
+            height: 1,
+            marginHorizontal: wp(4),
+            marginVertical: hp(1),
           }}
         />
 
         <View
           style={{
-            marginVertical: hp(3),
-            backgroundColor: '#fff',
-            elevation: 3,
-          }}>
-          <Text
-            style={{
-              alignSelf: 'center',
-              fontSize: wp(5),
-              fontWeight: '500',
-              color: '#000000',
-              marginVertical: hp(1),
-            }}>
-            Your Order
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(1),
-              justifyContent: 'space-between',
-              marginHorizontal: wp(2.5),
-            }}>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>Order</Text>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>30.00</Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(1),
-              justifyContent: 'space-between',
-              marginHorizontal: wp(2.5),
-            }}>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>Delivery</Text>
-            <Text style={{color: '#000000', fontSize: wp(4)}}>0.00</Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(1),
-              justifyContent: 'space-between',
-              marginHorizontal: wp(2.5),
-            }}>
-            <Text
-              style={{color: '#000000', fontSize: wp(4), fontWeight: '500'}}>
-              Summary
-            </Text>
-            <Text
-              style={{color: '#000000', fontSize: wp(4), fontWeight: '500'}}>
-              30.00
-            </Text>
-          </View>
-        </View>
-        <View style={{backgroundColor: '#fff', elevation: 5}}>
-          <Text
-            style={{
-              color: '#000000',
-              fontWeight: '500',
-              marginVertical: hp(1.2),
-              fontSize: wp(4),
-              marginHorizontal: wp(2.5),
-            }}>
-            Shipping address
-          </Text>
-        </View>
-
-        <RectButton
-          rippleColor={'#B04F58'}
-          style={{
-            height: hp(7),
+            flexDirection: 'row',
+            justifyContent: 'space-between',
             alignItems: 'center',
-            justifyContent: 'center',
             marginHorizontal: wp(4),
-            marginVertical: hp(2.5),
-            borderRadius: wp(1.5),
-            backgroundColor: '#d68088',
-            elevation: 8,
+            paddingVertical: hp(1),
           }}>
-          <Text style={{fontSize: wp(4.5), fontWeight: '500', color: '#fff'}}>
-            Add Shipping Address
-          </Text>
-        </RectButton>
+          <View>
+            <Text
+              style={{
+                color: '#e7b6b5',
+                fontFamily: 'Roboto-Bold',
+                fontSize: wp(4.3),
+                marginBottom: hp(1),
+              }}>
+              Billing & Shiping Address<Text style={{color: 'red'}}>*</Text>
+            </Text>
 
-        <View
-          style={{
-            backgroundColor: '#fff',
-            marginBottom: hp(3),
-            elevation: 3,
-          }}>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginHorizontal: wp(10),
-              marginTop: hp(2),
-              // flex: 1,
-              justifyContent: 'space-between',
-            }}>
-            <View>
+            {(shipping_address?.first_name || shipping_address?.last_name) && (
               <Text
-                style={{color: '#000', fontWeight: '300', fontSize: wp(4.2)}}>
-                First Name
+                style={{
+                  color: '#000',
+                  fontFamily: 'Montserrat-Medium',
+                  fontSize: wp(4.5),
+                  textTransform: 'capitalize',
+                  marginBottom: hp(0.5),
+                }}>
+                {(shipping_address?.first_name || '') +
+                  ' ' +
+                  (shipping_address?.last_name || '')}
               </Text>
+            )}
 
+            {shipping_address?.address_1 && (
               <Text
-                style={{color: '#000', fontWeight: '300', fontSize: wp(4.2)}}>
-                Street Name
+                style={{
+                  color: '#000',
+                  fontFamily: 'Montserrat-Light',
+                  fontSize: wp(4.2),
+                }}>
+                {(shipping_address?.address_1 || '') +
+                  ' ' +
+                  (shipping_address?.address_2 || '')}
               </Text>
-              <Text
-                style={{color: '#000', fontWeight: '300', fontSize: wp(4.2)}}>
-                Apartment
-              </Text>
-            </View>
+            )}
 
-            <View>
-              <RectButton rippleColor={'#f1f1f1'}>
-                <Text
-                  onPress={() => alert('hii')}
-                  style={{
-                    color: '#EEA0A0',
-                    fontWeight: '300',
-                    fontSize: wp(4.2),
-                  }}>
-                  Change
-                </Text>
-              </RectButton>
-            </View>
+            {shipping_address?.postcode && (
+              <Text
+                style={{
+                  color: '#000',
+                  fontFamily: 'Montserrat-Light',
+                  fontSize: wp(4.2),
+                }}>
+                {(shipping_address?.city || '') +
+                  ', ' +
+                  (shipping_address?.postcode || '') +
+                  ', ' +
+                  (shipping_address?.country || '')}
+              </Text>
+            )}
           </View>
 
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(3),
-              alignItems: 'center',
-              marginLeft: wp(10),
-            }}>
-            <RadioButton
-              uncheckedColor="#999"
-              color="#d68088"
-              value={select}
-              status={select ? 'checked' : 'unchecked'}
-              // onPress={() => setChecked(item)}
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() =>
+              navigation.navigate('AddShippingAddressScreen-Cart')
+            }>
+            <Icon
+              type="font-awesome"
+              name="angle-right"
+              size={wp(8)}
+              containerStyle={{padding: wp(3)}}
             />
-            <Text style={[styles.radioButtonText, {fontWeight: '400'}]}>
-              Select as a shippping address
-            </Text>
-          </View>
+          </TouchableOpacity>
         </View>
 
         <View
           style={{
-            backgroundColor: '#fff',
-            marginBottom: hp(3),
-            elevation: 3,
+            backgroundColor: '#ccc',
+            height: 1,
+            marginHorizontal: wp(4),
+            marginVertical: hp(1),
+          }}
+        />
+
+        <Text
+          style={{
+            color: '#e7b6b5',
+            fontFamily: 'Roboto-Bold',
+            fontSize: wp(4.3),
+            marginHorizontal: wp(4),
           }}>
-          <Text
-            style={{
-              color: '#000000',
-              fontWeight: '500',
-              marginTop: hp(1.2),
-              fontSize: wp(4),
-              marginHorizontal: wp(2.5),
-            }}>
-            Payment
+          Payment
+        </Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            marginVertical: hp(1),
+            alignItems: 'center',
+            marginHorizontal: wp(3),
+          }}>
+          {/* <RadioButton
+            uncheckedColor="#999"
+            color="#d68088"
+            value={selectedPayment}
+            status={selectedPayment === 'cod' ? 'checked' : 'unchecked'}
+            onPress={() => setSelectedPayment('cod')}
+          /> */}
+          <CheckBox
+            checked={selectedPayment === 'cod'}
+            onPress={() => setSelectedPayment('cod')}
+            // Use ThemeProvider to make change for all checkbox
+            iconType="material-community"
+            checkedIcon="checkbox-marked"
+            uncheckedIcon="checkbox-blank-outline"
+            checkedColor="#000"
+            uncheckedColor="#000"
+            containerStyle={{
+              margin: 0,
+              marginLeft: 0,
+              marginRight: 0,
+              padding: 0,
+            }}
+          />
+          <Text style={styles.radioButtonText}>
+            Cash on delivery (kuwait only)
           </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(3),
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity style={{marginLeft: wp(10)}} onPress={button1}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={true}
-                status={true ? 'checked' : 'unchecked'}
-                // onPress={() => setChecked(item)}
-              />
-            </TouchableOpacity>
-            <Text style={styles.radioButtonText}>
-              Cash on delivery (kumait only)
-            </Text>
-          </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              marginVertical: hp(3),
-              alignItems: 'center',
-            }}>
-            <TouchableOpacity style={{marginLeft: wp(10)}} onPress={button2}>
-              <RadioButton
-                uncheckedColor="#999"
-                color="#d68088"
-                value={true}
-                status={true ? 'checked' : 'unchecked'}
-                // onPress={() => setChecked(item)}
-              />
-            </TouchableOpacity>
-            <Text style={styles.radioButtonText}>
-              Pay by Debit/Credit card only
-            </Text>
-          </View>
         </View>
 
-        <RectButton
-          rippleColor={'#B04F58'}
+        <View
           style={{
-            height: hp(7),
+            flexDirection: 'row',
+            marginVertical: hp(1),
             alignItems: 'center',
-            justifyContent: 'center',
-            marginHorizontal: wp(4),
-            marginVertical: hp(2.5),
-            borderRadius: wp(1.5),
-            backgroundColor: '#d68088',
-            elevation: 8,
+            marginHorizontal: wp(3),
           }}>
-          <Text style={{fontSize: wp(4.5), fontWeight: '500', color: '#fff'}}>
-            Submit Order
+          <CheckBox
+            checked={selectedPayment === 'tap'}
+            onPress={() => setSelectedPayment('tap')}
+            // Use ThemeProvider to make change for all checkbox
+            iconType="material-community"
+            checkedIcon="checkbox-marked"
+            uncheckedIcon="checkbox-blank-outline"
+            checkedColor="#000"
+            uncheckedColor="#000"
+            containerStyle={{
+              margin: 0,
+              marginLeft: 0,
+              marginRight: 0,
+              padding: 0,
+            }}
+          />
+          {/* <RadioButton
+            uncheckedColor="#999"
+            color="#d68088"
+            value={selectedPayment}
+            status={selectedPayment === 'tap' ? 'checked' : 'unchecked'}
+            onPress={() => setSelectedPayment('tap')}
+          /> */}
+          <Text style={styles.radioButtonText}>
+            Pay by Debit/Credit card only
           </Text>
-        </RectButton>
+        </View>
+
+        <View
+          style={{
+            backgroundColor: '#ccc',
+            height: 1,
+            marginHorizontal: wp(4),
+            marginVertical: hp(1),
+          }}
+        />
       </ScrollView>
+      <PaymentUI
+        amount={Number(cartData?.totals?.total_price)}
+        handleSubmit={handleSubmit}
+        customer={{
+          email: billing_address?.email,
+          first_name: billing_address?.first_name,
+          last_name: billing_address?.last_name,
+          phone: billing_address?.phone,
+        }}
+      />
     </View>
   );
 };
@@ -296,7 +540,7 @@ export default CheckOutMighzal;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#eee',
+    backgroundColor: '#fff',
   },
   radiobuttonImage: {
     height: wp(7),
@@ -306,8 +550,8 @@ const styles = StyleSheet.create({
   radioButtonText: {
     alignSelf: 'center',
     fontSize: wp(4.2),
-    fontWeight: '300',
+    fontFamily: 'Montserrat-Light',
     color: '#000000',
-    marginLeft: wp(8),
+    marginLeft: wp(2),
   },
 });

@@ -4,19 +4,21 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Categories from '../screens/Categories';
 import CategoryProductList from '../screens/CategoryProductList';
 import ProductDetails from '../screens/ProductDetails';
+import SearchScreen from '../screens/SearchScreen';
 
 const CategoryStack = () => {
   const Stack = createNativeStackNavigator();
   return (
     <Stack.Navigator
       initialRouteName="CategoryScreen"
-      screenOptions={{headerShown: false}}>
+      screenOptions={{headerShown: false, animation: 'slide_from_right'}}>
       <Stack.Screen name="CategoryScreen" component={Categories} />
       <Stack.Screen
         name="ProductList-Category"
         component={CategoryProductList}
       />
       <Stack.Screen name="ProductDetails-Category" component={ProductDetails} />
+      <Stack.Screen name="SearchScreen-Category" component={SearchScreen} />
     </Stack.Navigator>
   );
 };

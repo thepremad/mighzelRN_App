@@ -9,21 +9,13 @@ import {
   widthPercentageToDP as wp,
 } from 'react-native-responsive-screen';
 
-const CategoryShimmer = () => {
+const CategoryShimmer = ({children}) => {
   const data = [1, 2, 3, 4];
   return (
     <View style={{flex: 1}}>
       <FlatList
         data={data}
-        ListHeaderComponent={() => (
-          <SkeletonPlaceholder borderRadius={4}>
-            <SkeletonPlaceholder.Item
-              height={hp(17)}
-              borderRadius={wp(3)}
-              marginHorizontal={wp(3)}
-            />
-          </SkeletonPlaceholder>
-        )}
+        ListHeaderComponent={() => children}
         renderItem={({item}) => (
           <SkeletonPlaceholder borderRadius={4}>
             <SkeletonPlaceholder.Item

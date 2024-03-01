@@ -7,49 +7,168 @@ import {
   TouchableOpacity,
   Image,
   ScrollView,
+  Alert,
 } from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 
 import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import {TextInput} from 'react-native-paper';
+import {ActivityIndicator, RadioButton, TextInput} from 'react-native-paper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 import Header from '../components/Header';
+import {useDispatch, useSelector} from 'react-redux';
+import {makeRequest} from '../api/ApiInfo';
+import {showSnack} from '../components/Snackbar';
+import {async_keys, getData} from '../storage/UserPreference';
+import {
+  fetchCartDataRequest,
+  fetchCartDataSuccess,
+} from '../redux/action/cartActions';
+import CustomDD from '../components/CustomDD';
+import {country_list} from '../components/CountryList';
 
 // image
 // import ima_leftArrow from '../asserts/Image/ima_leftArrow.png';
 // import ic_rightArrow from '../asserts/Image/ic_rightArrow.png';
-const AddressAddNewShipping = ({navigation}) => {
+const AddressAddNewShipping = ({navigation, route}) => {
+  const [loader, setLoader] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [countryCode, setCountryCode] = useState('');
+
   const [inputs, setInputs] = useState({
     first_name: '',
     last_name: '',
-    street_name: '',
-    apartment: '',
+    email: '',
+    address_1: '',
+    address_2: '',
     city: '',
-    zip_code: '',
+    postcode: '',
     country: '',
-    state: '',
     phone: '',
   });
+  const dispatch = useDispatch();
+
+  const {cartData, isLoading, error} = useSelector(state => state.cart);
+
+  // console.log('info', {SelectedCountry, stateList});
+
+  useEffect(() => {
+    if (cartData?.shipping_address) {
+      if (Object.keys(cartData?.shipping_address)?.length === 0) {
+        dispatch(fetchCartDataRequest());
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const address = cartData?.shipping_address;
+
+    if (address['country']) {
+      if (
+        country_list.filter(item => item.name === address['country'])?.length >
+        0
+      ) {
+        setCountryCode(
+          country_list.filter(item => item.name === address['country'])[0]
+            .dial_code,
+        );
+      }
+    }
+
+    let obj = {};
+    for (let key in inputs) {
+      obj = {...obj, [key]: address[key] || ''};
+    }
+    setInputs(obj);
+  }, [isLoading]);
 
   const handleInputs = (value, key) => {
     setInputs({...inputs, [key]: value});
   };
 
-  const handleSave = () => {
-    console.log(inputs);
+  const handleSelect = item => {
+    setInputs({...inputs, country: item.name});
+    setCountryCode(item.dial_code);
+    setOpenDropdown(false);
+  };
+
+  const handleSave = async () => {
+    let err = false;
+    for (let key in inputs) {
+      if (inputs[key]?.toString()?.trim() === '') {
+        err = true;
+      }
+    }
+
+    if (err) {
+      Alert.alert('', 'Please fill all the fields');
+      return false;
+    }
+
+    try {
+      const update = {
+        ...cartData,
+        shipping_address: inputs,
+      };
+      const customer_id = await getData(async_keys.customer_id);
+
+      setLoader(true);
+      const res = await makeRequest(
+        `update_shipping_address`,
+        {
+          ...inputs,
+          customer_id,
+          type: 'shipping',
+        },
+        true,
+      );
+      if (res) {
+        const {Status, Message} = res;
+        if (Status === true) {
+          console.log('res', res);
+          showSnack(Message);
+          dispatch(fetchCartDataSuccess(update));
+
+          if (route.name === 'AddShippingAddressScreen-Cart') {
+            navigation.goBack();
+          }
+        } else {
+          showSnack(Message, null, true);
+        }
+      } else {
+        showSnack('Some error occured', null, true);
+      }
+      setLoader(false);
+    } catch (error) {
+      setLoader(false);
+      showSnack('Some error occured', null, true);
+      console.log(error);
+    }
   };
 
   return (
     <View style={styles.container}>
+      {(isLoading || loader) && (
+        <View
+          style={{
+            position: 'absolute',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: hp(100),
+            width: wp(100),
+            zIndex: 9,
+          }}>
+          <ActivityIndicator color="#d68088" size={'large'} />
+        </View>
+      )}
       <Header
         navAction="back"
-        title="Add New Shipping Address"
-        titleStyle={{fontSize: wp(4.8), fontWeight: '400'}}
+        title={`Add/Edit Billing Address`}
+        titleStyle={{fontSize: wp(4.8), fontFamily: 'Montserrat-Regular'}}
         style={{marginBottom: hp(3)}}
       />
 
@@ -57,7 +176,7 @@ const AddressAddNewShipping = ({navigation}) => {
         <View style={styles.homeContainer}>
           <TextInput
             mode="flat"
-            label="First Name"
+            label="FIRST NAME *"
             placeholder="Enter First Name"
             style={{
               backgroundColor: 'transparent',
@@ -71,7 +190,7 @@ const AddressAddNewShipping = ({navigation}) => {
 
           <TextInput
             mode="flat"
-            label="Last Name"
+            label="LAST NAME *"
             placeholder="Enter Last Name"
             style={{
               backgroundColor: 'transparent',
@@ -83,23 +202,65 @@ const AddressAddNewShipping = ({navigation}) => {
             value={inputs.last_name}
           />
 
-          <TextInput
-            mode="flat"
-            label="Street Name"
-            placeholder="Enter House number and street name"
+          <Text style={{marginTop: hp(1), marginHorizontal: wp(5)}}>
+            COUNTRY / REGION *
+          </Text>
+          <TouchableOpacity
+            onPress={() => setOpenDropdown(true)}
+            style={styles.selecCityBox}>
+            <Text
+              style={{
+                fontSize: wp(4),
+                color: '#4F4848',
+                textTransform: 'capitalize',
+              }}>
+              {inputs.country || 'Select Country'}
+            </Text>
+            <AntDesign name="down" color="#4F4848" size={wp(5)} />
+
+            {openDropdown && (
+              <CustomDD
+                data={country_list}
+                openDropdown={openDropdown}
+                setOpenDropdown={setOpenDropdown}
+                handleSelect={handleSelect}
+              />
+            )}
+          </TouchableOpacity>
+          <View style={[styles.lineBox]} />
+
+          <View
             style={{
-              backgroundColor: 'transparent',
-              marginHorizontal: wp(1.5),
-            }}
-            underlineColor="#bbb"
-            activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'street_name')}
-            value={inputs.street_name}
-          />
+              flexDirection: 'row',
+              alignItems: 'center',
+              // marginHorizontal: wp(5.5),
+            }}>
+            {countryCode && (
+              <Text style={{color: '#000', marginLeft: wp(5.5)}}>
+                {countryCode}
+              </Text>
+            )}
+            <TextInput
+              mode="flat"
+              label="PHONE *"
+              placeholder="Enter Phone"
+              placeholderTextColor="#999"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#000',
+                flex: 1,
+              }}
+              underlineColor="transparent"
+              activeUnderlineColor="#d68088"
+              onChangeText={text => handleInputs(text, 'phone')}
+              value={inputs.phone}
+            />
+          </View>
+          <View style={[styles.lineBox]} />
 
           <TextInput
             mode="flat"
-            label="Apartment"
+            label="APARTMENT NUMBER, VILLA NUMBER, UNIT, ETC. *"
             placeholder="Apartment, suite, until etc.(optional)"
             style={{
               backgroundColor: 'transparent',
@@ -107,13 +268,27 @@ const AddressAddNewShipping = ({navigation}) => {
             }}
             underlineColor="#bbb"
             activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'apartment')}
-            value={inputs.apartment}
+            onChangeText={text => handleInputs(text, 'address_2')}
+            value={inputs.address_2}
           />
 
           <TextInput
             mode="flat"
-            label="City"
+            label="STREET ADDRESS / BLOCK *"
+            placeholder="STREET ADDRESS / BLOCK *"
+            style={{
+              backgroundColor: 'transparent',
+              marginHorizontal: wp(1.5),
+            }}
+            underlineColor="#bbb"
+            activeUnderlineColor="#d68088"
+            onChangeText={text => handleInputs(text, 'address_1')}
+            value={inputs.address_1}
+          />
+
+          <TextInput
+            mode="flat"
+            label="AREA / CITY *"
             placeholder="Enter City"
             style={{
               backgroundColor: 'transparent',
@@ -127,6 +302,20 @@ const AddressAddNewShipping = ({navigation}) => {
 
           <TextInput
             mode="flat"
+            label="EMAIL ADDRESS *"
+            placeholder="Enter Email"
+            style={{
+              backgroundColor: 'transparent',
+              marginHorizontal: wp(1.5),
+            }}
+            underlineColor="#bbb"
+            activeUnderlineColor="#d68088"
+            onChangeText={text => handleInputs(text, 'email')}
+            value={inputs.email}
+          />
+
+          {/* <TextInput
+            mode="flat"
             label="Zip Code(Postal Code)"
             placeholder="Enter Zip Code"
             style={{
@@ -135,40 +324,9 @@ const AddressAddNewShipping = ({navigation}) => {
             }}
             underlineColor="#bbb"
             activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'zip_code')}
-            value={inputs.zip_code}
-          />
-
-          <TouchableOpacity style={styles.selecCityBox}>
-            <Text style={{fontSize: wp(4), color: '#4F4848'}}>
-              Select Country
-            </Text>
-            <AntDesign name="right" color="#000" size={wp(5)} />
-          </TouchableOpacity>
-          <View style={[styles.lineBox, {marginTop: hp(2)}]} />
-
-          <TouchableOpacity style={styles.selecCityBox}>
-            <Text style={{fontSize: wp(4), color: '#4F4848'}}>
-              Select State/Province/Region
-            </Text>
-            <AntDesign name="right" color="#000" size={wp(5)} />
-          </TouchableOpacity>
-          <View style={[styles.lineBox, {marginTop: hp(2)}]} />
-
-          <TextInput
-            mode="flat"
-            label="Phone"
-            placeholder="Enter Phone"
-            placeholderTextColor="#999"
-            style={{
-              backgroundColor: 'transparent',
-              marginHorizontal: wp(1.5),
-            }}
-            underlineColor="#bbb"
-            activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'phone')}
-            value={inputs.phone}
-          />
+            onChangeText={text => handleInputs(text, 'postcode')}
+            value={inputs.postcode}
+          /> */}
 
           <TouchableOpacity onPress={handleSave} style={styles.saveButtonBox}>
             <Text style={styles.saveButtonText}>Save Address</Text>
@@ -199,7 +357,7 @@ const styles = StyleSheet.create({
 
   InformationText: {
     color: '#000',
-    fontWeight: '400',
+    fontFamily: 'Montserrat-Regular',
     marginLeft: wp(4),
   },
   righArrowImage: {
@@ -216,7 +374,7 @@ const styles = StyleSheet.create({
   firstNameTextInput: {
     fontSize: wp(4),
     color: '#000',
-    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
     marginLeft: wp(4),
     marginTop: hp(-1),
   },
@@ -240,7 +398,7 @@ const styles = StyleSheet.create({
     fontSize: wp(4),
     color: '#fff',
     paddingVertical: hp(2),
-    fontWeight: '500',
+    fontFamily: 'Montserrat-Medium',
   },
 
   rightArrowImage: {
@@ -251,7 +409,7 @@ const styles = StyleSheet.create({
   selecCityBox: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginHorizontal: wp(4),
-    marginTop: hp(2),
+    marginHorizontal: wp(5.5),
+    paddingVertical: hp(2),
   },
 });

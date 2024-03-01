@@ -1,3 +1,5 @@
+/* eslint-disable react/self-closing-comp */
+/* eslint-disable react/no-unstable-nested-components */
 /* eslint-disable no-catch-shadow */
 /* eslint-disable no-shadow */
 /* eslint-disable react-native/no-inline-styles */
@@ -6,7 +8,6 @@ import {
   View,
   Text,
   StyleSheet,
-  Image,
   TouchableOpacity,
   StatusBar,
 } from 'react-native';
@@ -16,49 +17,148 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 
-import Fontisto from 'react-native-vector-icons/Fontisto';
-
 // image
-import ic_email from '../assets/icons/ic_email.png';
-import ic_password from '../assets/icons/ic_password.png';
-import {RectButton} from 'react-native-gesture-handler';
-import {async_keys, storeData} from '../storage/UserPreference';
-import {CommonActions} from '@react-navigation/native';
+import {async_keys, getData, storeData} from '../storage/UserPreference';
 import {isValidEmail} from '../authentication/auth';
-import CustomSnack from '../components/CustomSnack';
-import {ActivityIndicator, Icon, TextInput} from 'react-native-paper';
-import {makeRequest} from '../api/ApiInfo';
+import {ActivityIndicator, Button, Icon, TextInput} from 'react-native-paper';
+import {BASE_URL, makeRequest} from '../api/ApiInfo';
 import {showSnack} from '../components/Snackbar';
+import {useDispatch} from 'react-redux';
+import {setMainRoute} from '../redux/action/routeActions';
+import PaymentUI from '../payment_gateway/PaymentUI';
 
-const LoginScreens = ({navigation}) => {
+// import RNGoSell from '@tap-payments/gosell-sdk-react-native';
+// import sdkConfigurations from '../payment_gateway/sdkConfigurations';
+
+const LoginScreens = ({navigation, route}) => {
+  // console.log('route', route);
   // using state
-  const [visible, setVisible] = useState(false);
-  const [error, setError] = useState(false);
   const [loader, setLoader] = useState(false);
-  const [snackText, setSnackText] = useState('');
   const [inputs, setInputs] = useState({
     email: '',
     password: '',
   });
+
+  const dispatch = useDispatch();
 
   const handleInputs = (value, key) => {
     setInputs({...inputs, [key]: value});
   };
 
   const handleSkip = async () => {
+    // RNGoSell.goSellSDK.startPayment(sdkConfigurations, 0, handleResult);
     await storeData(async_keys.skip_login_screen, true);
-    navigation.dispatch(
-      CommonActions.reset({
-        index: 0,
-        routes: [{name: 'LoginNavigator'}],
-      }),
-    );
+
+    if (route?.params?.back) {
+      navigation.goBack();
+    } else {
+      dispatch(setMainRoute('Login'));
+    }
+  };
+
+  // const handleResult = (error, status) => {
+  //   var myString = JSON.stringify(status);
+  //   console.log('status is ' + status.sdk_result);
+  //   console.log(myString);
+  //   var resultStr = String(status.sdk_result);
+  //   switch (resultStr) {
+  //     case 'SUCCESS':
+  //       handleSDKResult(status);
+  //       break;
+  //     case 'FAILED':
+  //       handleSDKResult(status);
+  //       break;
+  //     case 'SDK_ERROR':
+  //       console.log('sdk error............');
+  //       console.log(status['sdk_error_code']);
+  //       console.log(status['sdk_error_message']);
+  //       console.log(status['sdk_error_description']);
+  //       console.log('sdk error............');
+  //       break;
+  //     case 'NOT_IMPLEMENTED':
+  //       break;
+  //   }
+  // };
+
+  // const handleSDKResult = result => {
+  //   console.log('trx_mode::::');
+  //   console.log(result['trx_mode']);
+  //   switch (result['trx_mode']) {
+  //     case 'CHARGE':
+  //       console.log('Charge');
+  //       console.log(result);
+  //       printSDKResult(result);
+  //       break;
+
+  //     case 'AUTHORIZE':
+  //       printSDKResult(result);
+  //       break;
+
+  //     case 'SAVE_CARD':
+  //       printSDKResult(result);
+  //       break;
+
+  //     case 'TOKENIZE':
+  //       Object.keys(result).map(key => {
+  //         console.log(`TOKENIZE \t${key}:\t\t\t${result[key]}`);
+  //       });
+
+  //       // responseID = tapSDKResult['token'];
+  //       break;
+  //   }
+  // };
+
+  // const printSDKResult = result => {
+  //   if (!result) return;
+  //   Object.keys(result).map(key => {
+  //     console.log(`${result['trx_mode']}\t${key}:\t\t\t${result[key]}`);
+  //   });
+  // };
+
+  const addingInCart = async token => {
+    let isSuccess;
+    try {
+      const cartData = await getData(async_keys.cart_data);
+      if (cartData && cartData.length !== 0) {
+        const params = cartData?.items?.map(({product_id, quantity}) => ({
+          product_id,
+          quantity,
+        }));
+        var myHeaders = new Headers();
+        myHeaders.append('Content-Type', 'application/json');
+        var raw = JSON.stringify(params);
+        var requestOptions = {
+          method: 'POST',
+          headers: myHeaders,
+          body: raw,
+          redirect: 'follow',
+        };
+        const resp = await fetch(
+          `${BASE_URL}add_to_cart_all?token=${token}`,
+          requestOptions,
+        );
+        const result = await resp.json();
+        console.log(`add_to_cart_all`, {result, requestOptions});
+        if (result) {
+          //LOADER
+          setLoader(false);
+          const {Status, Message} = result;
+          isSuccess = Status;
+        }
+      } else {
+        setLoader(false);
+        isSuccess = true;
+      }
+    } catch (error) {
+      setLoader(false);
+      isSuccess = false;
+      console.log('addingInCart', error);
+    }
+    return isSuccess;
   };
 
   const handleLogin = async () => {
     const {email, password} = inputs;
-
-    console.log(!isValidEmail(email));
 
     if (!isValidEmail(email)) {
       showSnack('Please enter valid email!', null, true);
@@ -73,31 +173,40 @@ const LoginScreens = ({navigation}) => {
     }
 
     try {
+      //LOADER
       setLoader(true);
+
       const params = {username: email, password};
       const result = await makeRequest(`login`, params, true);
       if (result) {
         const {Status, Message} = result;
         if (Status === true) {
+          console.log(`login-resp`, result);
           const {Data} = result;
           await storeData(async_keys.auth_token, Data.token);
           await storeData(async_keys.user_display_name, Data.user_display_name);
-          showSnack(Message);
+          await storeData(async_keys.customer_id, Data.customer_id);
 
-          setInputs({
-            fullName: '',
-            email: '',
-            password: '',
-          });
-          setLoader(false);
+          const successfully_added = await addingInCart(Data.token);
 
-          handleSkip();
+          if (successfully_added) {
+            handleSkip();
+            setInputs({
+              fullName: '',
+              email: '',
+              password: '',
+            });
+          } else {
+            showSnack(`Something went wrong please login again`, null, true);
+          }
         } else {
+          //LOADER
           setLoader(false);
           showSnack(Message, null, true);
         }
       }
     } catch (error) {
+      setLoader(false);
       console.log('handleLogin()', error);
     }
   };
@@ -111,22 +220,26 @@ const LoginScreens = ({navigation}) => {
             position: 'absolute',
             height: hp(100),
             width: wp(100),
-            zIndex: 9,
+            zIndex: 99,
+            justifyContent: 'center',
+            backgroundColor: 'rgba(0,0,0,.5)',
           }}>
           <ActivityIndicator color="#d68088" size={'large'} />
         </View>
       )}
 
       <Text
+        disabled={route?.params?.back}
         onPress={handleSkip}
         style={{fontSize: wp(4), color: '#555', margin: wp(3)}}>
-        Skip
+        {route?.params?.back ? '' : 'Skip'}
       </Text>
 
       <View style={styles.homeContainer}>
         <Text style={styles.loginText}>Login</Text>
 
         <TextInput
+          inputMode="email"
           mode="flat"
           label=""
           placeholder="Enter Email"
@@ -171,15 +284,44 @@ const LoginScreens = ({navigation}) => {
           value={inputs.password}
         />
 
-        <TouchableOpacity>
-          <Text style={styles.forgetPasswordText}>Forgot Password</Text>
-        </TouchableOpacity>
+        <Button
+          mode="text"
+          textColor="#fff"
+          labelStyle={styles.forgetPasswordText}
+          // style={styles.loginButtonBox}
+          style={{
+            alignSelf: 'flex-end',
+            marginVertical: hp(1),
+          }}
+          onPress={() => navigation.navigate('ForgotPassword')}>
+          Forgot Password
+        </Button>
 
-        <RectButton onPress={handleLogin} style={styles.loginButtonBox}>
+        {/* <RectButton onPress={handleLogin} style={styles.loginButtonBox}>
           <Text style={styles.loginButtonText}>Login</Text>
-        </RectButton>
+        </RectButton> */}
 
-        <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
+        <Button
+          mode="text"
+          buttonColor="#d68088"
+          textColor="#fff"
+          labelStyle={{
+            fontSize: wp(4),
+            fontFamily: 'Montserrat-SemiBold',
+          }}
+          style={styles.loginButtonBox}
+          contentStyle={{
+            height: hp(6),
+          }}
+          // icon={() =>
+          //   !loader && <ActivityIndicator size="small" color="#fff" />
+          // }
+          // loading={true}
+          onPress={handleLogin}>
+          Login
+        </Button>
+
+        <TouchableOpacity onPress={() => navigation.navigate('SignUpScreen')}>
           <Text style={styles.registerHereText}>Register here</Text>
         </TouchableOpacity>
       </View>
@@ -201,7 +343,7 @@ const styles = StyleSheet.create({
     fontSize: wp(6),
     color: '#000',
     alignSelf: 'center',
-    fontWeight: '600',
+    fontFamily: 'Montserrat-SemiBold',
     marginVertical: hp(5),
     marginBottom: hp(10),
   },
@@ -209,26 +351,15 @@ const styles = StyleSheet.create({
   forgetPasswordText: {
     fontSize: wp(4),
     color: '#3a3a3a',
-    fontWeight: '500',
-    textAlign: 'right',
-    marginRight: wp(4),
-    marginVertical: hp(1),
+    fontFamily: 'Montserrat-Medium',
   },
 
   loginButtonBox: {
     backgroundColor: '#cf8385',
-    alignItems: 'center',
-    justifyContent: 'center',
     marginHorizontal: wp(8),
     marginTop: hp(5),
     elevation: 5,
-  },
-
-  loginButtonText: {
-    fontSize: wp(4),
-    color: '#fff',
-    paddingVertical: hp(1.5),
-    fontWeight: '500',
+    borderRadius: 0,
   },
 
   registerHereText: {

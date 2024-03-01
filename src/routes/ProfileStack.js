@@ -11,7 +11,12 @@ import LoggedOutNavigator from './LoggedOutNavigator';
 const ProfileStack = () => {
   const Stack = createNativeStackNavigator();
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator
+      initialRouteName="ProfileScreen"
+      screenOptions={{
+        headerShown: false,
+        animation: 'slide_from_right',
+      }}>
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />
       <Stack.Screen name="DashBoardScreen" component={DashboardInnerScreen} />
       <Stack.Screen name="OrderScreen" component={OrderTabScreen} />
@@ -21,10 +26,6 @@ const ProfileStack = () => {
         name="AddShippingAddressScreen"
         component={AddressAddNewShipping}
       />
-      {/* <Stack.Screen
-        name="LogoutNavigator-Profile"
-        component={LoggedOutNavigator}
-      /> */}
     </Stack.Navigator>
   );
 };
