@@ -52,7 +52,7 @@ const CustomDD = ({openDropdown, setOpenDropdown, data = [], handleSelect}) => {
           borderRadius: wp(2),
         }}>
         <TouchableOpacity
-          onPress={() => setOpenDropdown(null)}
+          onPress={() => setOpenDropdown(false)}
           style={{alignSelf: 'flex-end', padding: hp(1)}}>
           <EntypoIcon
             name="circle-with-cross"

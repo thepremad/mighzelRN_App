@@ -29,19 +29,15 @@ import {
   fetchCartDataSuccess,
 } from '../redux/action/cartActions';
 import CustomDD from '../components/CustomDD';
+import {country_list} from '../components/CountryList';
 
 // image
 // import ima_leftArrow from '../asserts/Image/ima_leftArrow.png';
 // import ic_rightArrow from '../asserts/Image/ic_rightArrow.png';
 const AddressAddNewShipping = ({navigation, route}) => {
   const [loader, setLoader] = useState(false);
-  const [selectedAddress, setSelectedAddress] = useState(1);
-  const [openDropdown, setOpenDropdown] = useState(null);
-  const [country, setCountry] = useState([]);
-  const [stateList, setStateList] = useState([]);
-
-  const [SelectedCountry, setSelectedCountry] = useState({});
-  const [SelectedState, setSelectedState] = useState({});
+  const [openDropdown, setOpenDropdown] = useState(false);
+  const [countryCode, setCountryCode] = useState('');
 
   const [inputs, setInputs] = useState({
     first_name: '',
@@ -61,64 +57,43 @@ const AddressAddNewShipping = ({navigation, route}) => {
   // console.log('info', {SelectedCountry, stateList});
 
   useEffect(() => {
-    const params = route.params;
-    if (params) {
-      if (params.type) {
-        setSelectedAddress(params.type || 1);
-      }
-    }
-
     if (cartData?.shipping_address) {
       if (Object.keys(cartData?.shipping_address)?.length === 0) {
         dispatch(fetchCartDataRequest());
       }
     }
-
-    fetchCountry();
   }, []);
 
   useEffect(() => {
     const address = cartData?.shipping_address;
-    let obj = {};
 
+    if (address['country']) {
+      if (
+        country_list.filter(item => item.name === address['country'])?.length >
+        0
+      ) {
+        setCountryCode(
+          country_list.filter(item => item.name === address['country'])[0]
+            .dial_code,
+        );
+      }
+    }
+
+    let obj = {};
     for (let key in inputs) {
       obj = {...obj, [key]: address[key] || ''};
     }
-
     setInputs(obj);
   }, [isLoading]);
-
-  const fetchCountry = () => {
-    setLoader(true);
-
-    makeRequest(`countaries`)
-      .then(result => {
-        if (result) {
-          const {Status} = result;
-          if (Status === true) {
-            const {Data} = result;
-            setCountry(Data);
-          }
-        }
-        setLoader(false);
-      })
-      .catch(e => {
-        setLoader(false);
-        console.log(e);
-      });
-  };
 
   const handleInputs = (value, key) => {
     setInputs({...inputs, [key]: value});
   };
 
   const handleSelect = item => {
-    if (openDropdown === 'country') {
-      setSelectedCountry(item);
-      setInputs({...inputs, country: item.name});
-    }
-
-    setOpenDropdown(null);
+    setInputs({...inputs, country: item.name});
+    setCountryCode(item.dial_code);
+    setOpenDropdown(false);
   };
 
   const handleSave = async () => {
@@ -201,7 +176,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
         <View style={styles.homeContainer}>
           <TextInput
             mode="flat"
-            label="First Name"
+            label="FIRST NAME *"
             placeholder="Enter First Name"
             style={{
               backgroundColor: 'transparent',
@@ -215,7 +190,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
 
           <TextInput
             mode="flat"
-            label="Last Name"
+            label="LAST NAME *"
             placeholder="Enter Last Name"
             style={{
               backgroundColor: 'transparent',
@@ -227,37 +202,65 @@ const AddressAddNewShipping = ({navigation, route}) => {
             value={inputs.last_name}
           />
 
-          <TextInput
-            mode="flat"
-            label="Email"
-            placeholder="Enter Email"
+          <Text style={{marginTop: hp(1), marginHorizontal: wp(5)}}>
+            COUNTRY / REGION *
+          </Text>
+          <TouchableOpacity
+            onPress={() => setOpenDropdown(true)}
+            style={styles.selecCityBox}>
+            <Text
+              style={{
+                fontSize: wp(4),
+                color: '#4F4848',
+                textTransform: 'capitalize',
+              }}>
+              {inputs.country || 'Select Country'}
+            </Text>
+            <AntDesign name="down" color="#4F4848" size={wp(5)} />
+
+            {openDropdown && (
+              <CustomDD
+                data={country_list}
+                openDropdown={openDropdown}
+                setOpenDropdown={setOpenDropdown}
+                handleSelect={handleSelect}
+              />
+            )}
+          </TouchableOpacity>
+          <View style={[styles.lineBox]} />
+
+          <View
             style={{
-              backgroundColor: 'transparent',
-              marginHorizontal: wp(1.5),
-            }}
-            underlineColor="#bbb"
-            activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'email')}
-            value={inputs.email}
-          />
+              flexDirection: 'row',
+              alignItems: 'center',
+              // marginHorizontal: wp(5.5),
+            }}>
+            {countryCode && (
+              <Text style={{color: '#000', marginLeft: wp(5.5)}}>
+                {countryCode}
+              </Text>
+            )}
+            <TextInput
+              mode="flat"
+              label="PHONE *"
+              placeholder="Enter Phone"
+              placeholderTextColor="#999"
+              style={{
+                backgroundColor: 'transparent',
+                color: '#000',
+                flex: 1,
+              }}
+              underlineColor="transparent"
+              activeUnderlineColor="#d68088"
+              onChangeText={text => handleInputs(text, 'phone')}
+              value={inputs.phone}
+            />
+          </View>
+          <View style={[styles.lineBox]} />
 
           <TextInput
             mode="flat"
-            label="Street Name"
-            placeholder="Enter House number and street name"
-            style={{
-              backgroundColor: 'transparent',
-              marginHorizontal: wp(1.5),
-            }}
-            underlineColor="#bbb"
-            activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'address_1')}
-            value={inputs.address_1}
-          />
-
-          <TextInput
-            mode="flat"
-            label="Apartment"
+            label="APARTMENT NUMBER, VILLA NUMBER, UNIT, ETC. *"
             placeholder="Apartment, suite, until etc.(optional)"
             style={{
               backgroundColor: 'transparent',
@@ -271,7 +274,21 @@ const AddressAddNewShipping = ({navigation, route}) => {
 
           <TextInput
             mode="flat"
-            label="City"
+            label="STREET ADDRESS / BLOCK *"
+            placeholder="STREET ADDRESS / BLOCK *"
+            style={{
+              backgroundColor: 'transparent',
+              marginHorizontal: wp(1.5),
+            }}
+            underlineColor="#bbb"
+            activeUnderlineColor="#d68088"
+            onChangeText={text => handleInputs(text, 'address_1')}
+            value={inputs.address_1}
+          />
+
+          <TextInput
+            mode="flat"
+            label="AREA / CITY *"
             placeholder="Enter City"
             style={{
               backgroundColor: 'transparent',
@@ -285,6 +302,20 @@ const AddressAddNewShipping = ({navigation, route}) => {
 
           <TextInput
             mode="flat"
+            label="EMAIL ADDRESS *"
+            placeholder="Enter Email"
+            style={{
+              backgroundColor: 'transparent',
+              marginHorizontal: wp(1.5),
+            }}
+            underlineColor="#bbb"
+            activeUnderlineColor="#d68088"
+            onChangeText={text => handleInputs(text, 'email')}
+            value={inputs.email}
+          />
+
+          {/* <TextInput
+            mode="flat"
             label="Zip Code(Postal Code)"
             placeholder="Enter Zip Code"
             style={{
@@ -295,46 +326,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
             activeUnderlineColor="#d68088"
             onChangeText={text => handleInputs(text, 'postcode')}
             value={inputs.postcode}
-          />
-
-          <TouchableOpacity
-            onPress={() => setOpenDropdown('country')}
-            style={styles.selecCityBox}>
-            <Text
-              style={{
-                fontSize: wp(4),
-                color: '#4F4848',
-                textTransform: 'capitalize',
-              }}>
-              {inputs.country || 'Select Country'}
-            </Text>
-            <AntDesign name="down" color="#4F4848" size={wp(5)} />
-
-            {openDropdown === 'country' && (
-              <CustomDD
-                data={country}
-                openDropdown={openDropdown === 'country'}
-                setOpenDropdown={setOpenDropdown}
-                handleSelect={handleSelect}
-              />
-            )}
-          </TouchableOpacity>
-          <View style={[styles.lineBox]} />
-
-          <TextInput
-            mode="flat"
-            label="Phone"
-            placeholder="Enter Phone"
-            placeholderTextColor="#999"
-            style={{
-              backgroundColor: 'transparent',
-              marginHorizontal: wp(1.5),
-            }}
-            underlineColor="#bbb"
-            activeUnderlineColor="#d68088"
-            onChangeText={text => handleInputs(text, 'phone')}
-            value={inputs.phone}
-          />
+          /> */}
 
           <TouchableOpacity onPress={handleSave} style={styles.saveButtonBox}>
             <Text style={styles.saveButtonText}>Save Address</Text>

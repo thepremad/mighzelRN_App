@@ -94,8 +94,11 @@ const CartMighzal = ({navigation}) => {
 
             // Calculate the discounted price
             const discountAmount = data?.amount;
-            const total_discount = (total_price * Number(discountAmount)) / 100;
-            total_price = total_price - total_discount;
+            const total_discount = (
+              (total_price * Number(discountAmount)) /
+              100
+            ).toFixed(2);
+            total_price = (total_price - total_discount).toFixed(2);
 
             const dataToSave = {
               ...cartData,
