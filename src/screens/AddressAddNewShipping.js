@@ -46,7 +46,6 @@ const AddressAddNewShipping = ({navigation, route}) => {
     address_1: '',
     address_2: '',
     city: '',
-    postcode: '',
     country: '',
     phone: '',
   });
@@ -57,15 +56,15 @@ const AddressAddNewShipping = ({navigation, route}) => {
   // console.log('info', {SelectedCountry, stateList});
 
   useEffect(() => {
-    if (cartData?.shipping_address) {
-      if (Object.keys(cartData?.shipping_address)?.length === 0) {
+    if (cartData?.billing_address) {
+      if (Object.keys(cartData?.billing_address)?.length === 0) {
         dispatch(fetchCartDataRequest());
       }
     }
   }, []);
 
   useEffect(() => {
-    const address = cartData?.shipping_address;
+    const address = cartData?.billing_address;
 
     if (address['country']) {
       if (
@@ -96,11 +95,14 @@ const AddressAddNewShipping = ({navigation, route}) => {
     setOpenDropdown(false);
   };
 
+  console.log(inputs);
+
   const handleSave = async () => {
     let err = false;
     for (let key in inputs) {
       if (inputs[key]?.toString()?.trim() === '') {
         err = true;
+        console.log(key);
       }
     }
 
@@ -112,7 +114,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
     try {
       const update = {
         ...cartData,
-        shipping_address: inputs,
+        billing_address: inputs,
       };
       const customer_id = await getData(async_keys.customer_id);
 
@@ -122,7 +124,7 @@ const AddressAddNewShipping = ({navigation, route}) => {
         {
           ...inputs,
           customer_id,
-          type: 'shipping',
+          type: 'billing',
         },
         true,
       );

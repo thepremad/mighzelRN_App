@@ -58,7 +58,7 @@ const ProcessingScreen = ({navigation}) => {
               fontFamily: 'Montserrat-SemiBold',
               color: '#000',
             }}>
-            {item?.order_number}
+            #{item?.order_number}
             {'\n'}Tracking No:
           </Text>
 
