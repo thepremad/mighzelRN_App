@@ -10,8 +10,9 @@ import Header from '../components/Header';
 
 const OrderDetails = ({navigation, route}) => {
   const details = route.params?.item;
+
   let subTotal = 0;
-  console.log(details);
+  console.log('details', details);
 
   return (
     <View style={styles.container}>
@@ -99,7 +100,7 @@ const OrderDetails = ({navigation, route}) => {
 
         <Text style={styles.orderDetilText}>Billing Address:</Text>
         <View style={styles.BillingBox}>
-          {Object.keys(details?.billing)?.map((key, index) => (
+          {Object.keys(details?.billing || {})?.map((key, index) => (
             <View
               style={{
                 flexDirection: 'row',

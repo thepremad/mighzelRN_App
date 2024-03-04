@@ -6,8 +6,6 @@ import {
   Text,
   View,
   TouchableOpacity,
-  TextInput,
-  Image,
   ScrollView,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
@@ -35,7 +33,7 @@ const CheckOutMighzal = ({navigation, route}) => {
 
   const dispatch = useDispatch();
   const {cartData, error} = useSelector(state => state.cart);
-  const {billing_address, shipping_address} = cartData;
+  const {billing_address} = cartData;
 
   // console.log('cart-checkout', cartData);
   // const {userData, isLoading} = useSelector(state => state.user);
@@ -47,7 +45,7 @@ const CheckOutMighzal = ({navigation, route}) => {
   const handleSubmit = async startPayment => {
     try {
       if (selectedAddress !== 2) {
-        if (Object.keys(shipping_address).length === 0) {
+        if (Object.keys(billing_address).length === 0) {
           showSnack('Please add billing address', null, true);
           return true;
         }
@@ -366,7 +364,7 @@ const CheckOutMighzal = ({navigation, route}) => {
               Billing & Shiping Address<Text style={{color: 'red'}}>*</Text>
             </Text>
 
-            {(shipping_address?.first_name || shipping_address?.last_name) && (
+            {(billing_address?.first_name || billing_address?.last_name) && (
               <Text
                 style={{
                   color: '#000',
@@ -375,37 +373,37 @@ const CheckOutMighzal = ({navigation, route}) => {
                   textTransform: 'capitalize',
                   marginBottom: hp(0.5),
                 }}>
-                {(shipping_address?.first_name || '') +
+                {(billing_address?.first_name || '') +
                   ' ' +
-                  (shipping_address?.last_name || '')}
+                  (billing_address?.last_name || '')}
               </Text>
             )}
 
-            {shipping_address?.address_1 && (
+            {billing_address?.address_1 && (
               <Text
                 style={{
                   color: '#000',
                   fontFamily: 'Montserrat-Light',
                   fontSize: wp(4.2),
                 }}>
-                {(shipping_address?.address_1 || '') +
+                {(billing_address?.address_1 || '') +
                   ' ' +
-                  (shipping_address?.address_2 || '')}
+                  (billing_address?.address_2 || '')}
               </Text>
             )}
 
-            {shipping_address?.postcode && (
+            {billing_address?.postcode && (
               <Text
                 style={{
                   color: '#000',
                   fontFamily: 'Montserrat-Light',
                   fontSize: wp(4.2),
                 }}>
-                {(shipping_address?.city || '') +
+                {(billing_address?.city || '') +
                   ', ' +
-                  (shipping_address?.postcode || '') +
+                  (billing_address?.postcode || '') +
                   ', ' +
-                  (shipping_address?.country || '')}
+                  (billing_address?.country || '')}
               </Text>
             )}
           </View>

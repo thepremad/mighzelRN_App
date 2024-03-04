@@ -55,7 +55,7 @@ const CancelledScreen = ({navigation}) => {
   const ItemView = ({item}) => {
     return (
       <RectButton
-        onPress={() => navigation.navigate('OrderDetailsScreen')}
+        onPress={() => navigation.navigate('OrderDetailsScreen', {item})}
         style={{
           marginHorizontal: wp(1),
           backgroundColor: '#fff',
@@ -84,7 +84,7 @@ const CancelledScreen = ({navigation}) => {
               fontFamily: 'Montserrat-SemiBold',
               color: '#000',
             }}>
-            {item.order_id}
+            #{item?.order_number}
             {'\n'}Tracking No:
           </Text>
 
