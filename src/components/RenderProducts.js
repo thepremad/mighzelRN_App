@@ -1,5 +1,6 @@
 import {
   Image,
+  Platform,
   StyleSheet,
   Text,
   TouchableHighlight,
@@ -56,6 +57,14 @@ const RenderProducts = ({item, index, home, handleRelatedProd}) => {
     [route, navigation],
   );
 
+  const customStyle = `
+    <style>
+      span {
+        font-size: 40px !important; /* Adjust the font size as needed */
+      }
+    </style>
+  `;
+
   return (
     <TouchableOpacity
       onPress={() => handleProductDetails(item.product_id)}
@@ -71,7 +80,6 @@ const RenderProducts = ({item, index, home, handleRelatedProd}) => {
         defaultSource={require('../assets/images/product_placeholder_image.png')}
         resizeMode={FastImage.resizeMode.stretch}
       />
-
       <Text
         numberOfLines={1}
         style={[styles.nameText, home && {alignSelf: 'center'}]}>
@@ -83,12 +91,11 @@ const RenderProducts = ({item, index, home, handleRelatedProd}) => {
         )}
         <Text style={styles.priceText}>{item?.sale_price} KWD</Text>
       </View> */}
-
       <WebView
         scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
-        source={{html: item?.price_html}}
+        source={{html: `${customStyle}${item?.price_html}`}}
         style={[
           {
             height: hp(2.3),
@@ -99,7 +106,6 @@ const RenderProducts = ({item, index, home, handleRelatedProd}) => {
           },
         ]}
         textZoom={280}
-        // injectedJavaScript={cutomScript}
       />
     </TouchableOpacity>
   );

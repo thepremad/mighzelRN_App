@@ -93,13 +93,13 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.mighzal"
+    namespace "com.mighzalalarab.wpEcommerce"
     defaultConfig {
-        applicationId "com.mighzal"
+        applicationId "com.mighzalalarab.wpEcommerce"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
-        versionName "1.0"
+        versionName "1.1"
     }
 
     splits {

@@ -1,4 +1,4 @@
-package com.mighzal;
+package com.mighzalalarab.wpEcommerce;
 
 import android.app.Application;
 import com.facebook.react.PackageList;

@@ -1,4 +1,4 @@
-package com.mighzal;
+package com.mighzalalarab.wpEcommerce;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
