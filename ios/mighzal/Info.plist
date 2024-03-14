@@ -37,6 +37,9 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string/>
+	<key>NSCameraUsageDescription</key>
+	<string>This app requires access to the camera to allow users to capture photos for setting their profile images.</string>
+	
 	<key>UIAppFonts</key>
 	<array>
 		<string>Roboto-Black.ttf</string>

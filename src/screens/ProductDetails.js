@@ -258,7 +258,7 @@ const ProductDetails = ({navigation, route}) => {
           <WebView
             source={{html: data?.price_html}}
             style={{
-              borderWidth: 2,
+              // borderWidth: 2,
               height: hp(4),
               marginHorizontal: wp(4),
               marginBottom: hp(2),
@@ -339,7 +339,7 @@ const ProductDetails = ({navigation, route}) => {
             <WebView
               source={{html: data?.description}}
               style={{
-                borderWidth: 2,
+                // borderWidth: 2,
                 height: hp(20),
                 // marginHorizontal: wp(7),
                 marginBottom: hp(2),
