@@ -44,18 +44,16 @@ const CheckOutMighzal = ({navigation, route}) => {
 
   const handleSubmit = async startPayment => {
     try {
-      if (selectedAddress !== 2) {
-        if (Object.keys(billing_address).length === 0) {
-          showSnack('Please add billing address', null, true);
-          return true;
+      let add_error = true;
+      for (let key in billing_address) {
+        if (billing_address[key]) {
+          add_error = false;
         }
       }
 
-      if (selectedAddress !== 1) {
-        if (Object.keys(billing_address).length === 0) {
-          showSnack('Please add shipping address', null, true);
-          return true;
-        }
+      if (add_error) {
+        showSnack('Please add billing address', null, true);
+        return true;
       }
 
       if (!selectedPayment) {

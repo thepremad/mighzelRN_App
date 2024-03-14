@@ -119,7 +119,7 @@ const allConfigurations = (totalAmount, customer_detail) => {
       trxMode: TrxMode.PURCHASE,
       // taxes: taxes,
       merchantID: '',
-      SDKMode: SDKMode.Sandbox,
+      SDKMode: SDKMode.Production,
       customer: customer,
       isRequires3DSecure: true,
       receiptSettings: {id: null, email: true, sms: false},

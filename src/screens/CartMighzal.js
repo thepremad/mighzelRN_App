@@ -14,6 +14,7 @@ import {
   StatusBar,
   ScrollView,
   RefreshControl,
+  Platform,
 } from 'react-native';
 import React, {memo, useCallback, useEffect, useMemo, useState} from 'react';
 import {
@@ -524,7 +525,11 @@ const CartMighzal = ({navigation}) => {
                 colors={colors}
               />
             }>
-            <View style={{marginBottom: hp(2)}}>
+            <View
+              style={{
+                marginBottom: hp(2),
+                marginTop: Platform.OS === 'ios' && hp(2),
+              }}>
               <TextInput
                 editable={cartData?.coupons.length === 0}
                 placeholder="Enter Promo code"
