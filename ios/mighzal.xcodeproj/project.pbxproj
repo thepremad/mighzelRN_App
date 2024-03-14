@@ -320,6 +320,7 @@
 				00E356F51AD99517003FC87E /* PBXTargetDependency */,
 			);
 			name = mighzalTests;
+			productName = mighzalTests;
 			productReference = 00E356EE1AD99517003FC87E /* mighzalTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
@@ -549,11 +550,9 @@
 			files = (
 			);
 			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mighzal/Pods-mighzal-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-mighzal/Pods-mighzal-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -691,12 +690,12 @@
 				DEVELOPMENT_TEAM = 4U2DBRJ8U8;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = mighzal/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Mighzal Al Arab;
+				INFOPLIST_KEY_CFBundleDisplayName = Mighzal;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -723,12 +722,12 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 4U2DBRJ8U8;
 				INFOPLIST_FILE = mighzal/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Mighzal Al Arab;
+				INFOPLIST_KEY_CFBundleDisplayName = Mighzal;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.1;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
